@@ -225,23 +225,6 @@ void customMSGfunc(int len, unsigned char *msg)
         // ------------------------------------
         // create a texture
         // ------------------------------------
-        /*
-        // make ImageMagick object / read file into memory
-        Magick::Blob blob;
-        // set RGBA output format
-        image.magick("RGBA");
-        // write to BLOB in RGBA format
-        image.write(&blob);
-        // create the temporary Texture
-        GLuint GLtexture;
-        glGenTextures(1, &GLtexture);
-        // bind the texture to the next thing we make
-        glBindTexture(GL_TEXTURE_2D, GLtexture);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-        gluBuild2DMipmaps(GL_TEXTURE_2D, 4, image.columns(), image.rows(), GL_RGBA, GL_UNSIGNED_BYTE, blob.data());
-        */
-
 
         // make ImageMagick object / read file into memory
         Magick::Blob blob;
@@ -272,38 +255,6 @@ void customMSGfunc(int len, unsigned char *msg)
         //m_windowList.push_back (newWindow);
         m_windowList.push_front (newWindow);
 
-        //iter_swap(cii,m_windowList.begin());
-        /*
-        // ------------------------------------
-        // write it to file if necessary
-        // we want to try it without
-        // ------------------------------------
-        //std::string filename(getenv("HOME"));
-        //filename.append("/data/images/out.png");
-        //image.magick("png");
-        //image.write(filename);
-
-        // ------------------------------------
-        // create a texture
-        // ------------------------------------
-        // make ImageMagick object / read file into memory
-        Magick::Blob blob;
-        // set RGBA output format
-        image.magick("RGBA");
-        // write to BLOB in RGBA format
-        image.write(&blob);
-        // pointer to temporary Texture
-        GLuint GLtexture;
-        // create the temporary Texture
-        glGenTextures(1, &GLtexture);
-        // bind the texture to the next thing we make
-        glBindTexture(GL_TEXTURE_2D, GLtexture);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-        gluBuild2DMipmaps(GL_TEXTURE_2D, 4, image.columns(), image.rows(), GL_RGBA, GL_UNSIGNED_BYTE, blob.data());
-        // draw sphere
-        //gluSphere(quadratic, ObjectRadius, 32, 32);
-        */
         printf("Add window with ID: %d\n",newWindow->getWID());
     }cglXUpdateDone();
 
@@ -435,11 +386,6 @@ void motionfunc(int x,int y)
         if(iter!=m_InteractionMap.end())
         {
             csWindow* window = m_InteractionMap[cglxEM::getUID()];
-            /*if(window->getButton()==CGLX_LEFT_BUTTON)
-                window->move(vec.x,vec.y);
-            if(window->getButton()==CGLX_RIGHT_BUTTON)
-                window->scale(vec.x,vec.y);
-            */
             switch (window->getButton())
             {
                 case CGLX_LEFT_BUTTON:
@@ -488,19 +434,12 @@ int main(int argc, char** argv)
     cglXCustomMsgFunc   (customMSGfunc);
     cglXMainLoop();
 
-    // ----------------------------------
-    // clean up our windows
-    // ----------------------------------
-    /*for(csWindow::iter it = m_windowMap.begin(); it != m_windowMap.end();it++)    // returns immediately if map is empty
-    {
-        delete (*it).second;
-        m_windowMap.erase(it);
-    }*/
 
     // ----------------------------------
     // clean up interaction map
     // ----------------------------------
     m_InteractionMap.clear();
+
     // ----------------------------------
     // clean up our windows
     // ----------------------------------

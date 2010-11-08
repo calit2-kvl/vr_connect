@@ -187,21 +187,7 @@ public:
             glVertex2f(a,-b);
         glEnd();
         */
-        /*
-        glPushMatrix();
-        glTranslatef(posx,posy,0);
-        glBegin(GL_QUADS);
-            glTexCoord2f(0, 0);
-            glVertex2f(-width*.5, -height*.5);
-            glTexCoord2f(0, 1);
-            glVertex2f(-width*.5, height*.5);
-            glTexCoord2f(1, 1);
-            glVertex2f(width*.5, height*.5);
-            glTexCoord2f(1, 0);
-            glVertex2f(width*.5, -height*.5);
-        glEnd();
-        glPopMatrix();
-        */
+
         glPushMatrix();
         glTranslatef(posx,posy,0);
         glBegin(GL_QUADS);
