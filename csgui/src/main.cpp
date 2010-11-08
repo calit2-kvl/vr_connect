@@ -145,8 +145,8 @@ void csImgGoogle::cs_disconnect()
     if(!connected)return;
     connected = false;
     pb_ConnectDisconnect->setText ( QString("Connect"));
-    /*le_IP->setDisabled (false);
-    sb_World->setDisabled (false);*/
+    le_IP->setDisabled (false);
+    sb_World->setDisabled (false);
 }
 void csImgGoogle::on_pb_ConnectDisconnect_pressed()
 {
