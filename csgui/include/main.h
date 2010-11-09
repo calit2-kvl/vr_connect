@@ -1,7 +1,7 @@
 /*
 +-------------------------------------------------------------------------------+
 | @BEGIN_COPYRIGHT                                                             	|
-|        									|
+|                                                                               |
 | Copyright (C) 2010-2015, The Regents of the University of California &       	|
 | King Abdula University of Science and Technology                              |
 | All Rights Reserved.                                                          |
@@ -10,8 +10,8 @@
 | Prototyped and developed By:                                                  |
 |    Kai-Uwe Doerr       {kdoerr@usd.edu}                                       |
 |    Christopher Knox  	 {christopher.knox@kaust.edu.sa}                        |
-|        									|
-| @END_COPYRIGHT                                                           	|
+|                                                                               |
+| @END_COPYRIGHT                                                                |
 +-------------------------------------------------------------------------------+
 |                                               
 | Component  : 
@@ -36,7 +36,12 @@
 #include <QtGui>
 #include "cglXNet.h"
 #include "ui_csgoogle.h"
-
+/*! \file main.h
+ *
+ */
+// -----------------------------------------------------------------------------+
+// FORWARD DECLARATION
+// -----------------------------------------------------------------------------+
 class csImgGoogle;
 
 // -----------------------------------------------------------------------------+
@@ -44,22 +49,40 @@ class csImgGoogle;
 // -----------------------------------------------------------------------------+
 // Create your own server class
 // prototype (Sub-Classing method)
-// ------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------+
+/*! \class myserver
+ *  \brief Image loader server class.
+ *
+ *   Image loader server base class. (cglX).
+ *
+ *  \author Kai-U. Doerr
+ *  \date   2010
+ *
+ */
 class myserver: public cglXServer
 {
 
 public:
-  // constructor
+  /*! \fn myserver::myserver(cs_hci_type_E type = CS_HCI_UNDEF, int port=-1, cs_serv_mode_E mode = CS_SERV_PASSIVE);
+   *  \brief Default Constructor.
+   */
   myserver(cs_hci_type_E type = CS_HCI_UNDEF, int port=-1, cs_serv_mode_E mode = CS_SERV_PASSIVE);
-  // destructor
+  /*! \fn myserver::~myserver();
+   *  \brief Default Destructor.
+   */
   ~myserver();
 
-  // signal connect
+  /*! \fn void signal_connected(const int PID = -1, const char *IP=NULL, const int World=-1, const int UID=-1 );
+   *  \brief Called when server connects to a client.
+   */
   void signal_connected(const int PID = -1, const char *IP=NULL, const int World=-1, const int UID=-1 );
-
-  // signal disconnect
+  /*! \fn void signal_disconnected(const int PID = -1, const char *IP=NULL, const int World=-1, const int UID=-1);
+   *  \brief Called when server disconnects from a client.
+   */
   void signal_disconnected(const int PID = -1, const char *IP=NULL, const int World=-1, const int UID=-1);
-
+  /*! \fn void setGoogler(csImgGoogle* _googler)
+   *  \brief Set the googler pointer.
+   */
   void setGoogler(csImgGoogle* _googler){googler=_googler;}
 protected:
     csImgGoogle *googler;
@@ -82,7 +105,6 @@ class csPage : public QWebPage
 public:
     csPage();
     void triggerAction ( WebAction _action, bool checked = false );
-
     WebAction getCurrentAction(void){return current_action;}
 protected:
 
@@ -123,7 +145,7 @@ public slots:
     void on_pb_Home_pressed();
     void on_pb_Back_pressed();
     void on_pb_Forward_pressed();
-
+    //
     void ImgDownload(const QNetworkRequest & request);
 
 protected:

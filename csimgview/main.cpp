@@ -1,27 +1,29 @@
 /*
 +---------------------------------------------------------------------------------------+
-| @BEGIN_COPYRIGHT                                               			|
-|                                       						|
-| Copyright (C) XXXX-XXXX, Wo ever                                    			|
-| All Rights Reserved for ...                                         			|
-|                                                                      			|
-| @END_COPYRIGHT			                                                |
+| @BEGIN_COPYRIGHT                                                                      |
+|                                                                                       |
+| Copyright (C) 2010-2015, The Regents of the University of California &                |
+| King Abdula University of Science and Technology                                      |
+| All Rights Reserved.                                                                  |
+|                                                                                       |
+|                                                                                       |
+| Prototyped and developed By:                                                          |
+|    Kai-Uwe Doerr       {kdoerr@usd.edu}                                               |
+|    Christopher Knox  	 {christopher.knox@kaust.edu.sa}                                |
+|                                                                                       |
+| @END_COPYRIGHT                                                                        |
 +---------------------------------------------------------------------------------------+
-|                                               
-| Component  : 
-| Filename   : main.cpp
-| Sourcefile : 
-| Language   : C++
-|                                               
-+----------------------------- Revision Information-------------------------------------+
-| $Author: XXX $
-| $Revision: 0.0.0.0 $
-| $Date: 0 $
-| $RCSfile: 0 $
-+---------------------------------------------------------------------------------------+
-|                        This is a simple example program.
-|              (It should help you to get started with CGLX programming) 
 |
+| Component  :
+| Filename   :
+| Sourcefile :
+| Language   : C++
+|
++----------------------------- Revision Information-------------------------------------+
+| $Author: kdoerr $
+| $Revision: 1.1.1.1 $
+| $Date: 2010/10/22 19:14:22 $
+| $RCSfile: main.cpp,v $
 +---------------------------------------------------------------------------------------+
 */
 // -------------------------------------------------------------------------------------+
@@ -36,10 +38,11 @@
 int     db_device_ID    = -1;
 
 // -------------------------------------------------------------------------------------+
-// This is our window list
+// This is our window list (later on we have objects and then subclass a window)
 // -------------------------------------------------------------------------------------+
-std::list<csWindow*> m_windowList;
-std::map<int,csWindow*> m_InteractionMap;
+std::list<csWindow*> m_windowList;          // list of objects
+std::map<int,csWindow*> m_InteractionMap;   // use user id to find object
+std::map<uint64_t,csWindow*> m_DBObjectMap; // use db object id to find object
 
 // -------------------------------------------------------------------------------------+
 // CLASS IMPLEMENTATION
@@ -100,7 +103,6 @@ private:
     int		base_id_range;
     std::list<int> id_pool;
 };
-
 IDPool  my_id_pool;
 
 // -------------------------------------------------------------------------------------+
@@ -135,7 +137,6 @@ void transPointerPos(vec2f_P vec)
 
     //printf("Out-> X: %f Y: %f\n\n",vec->x,vec->y);
 }
-
 void loadImage( const char* msg)
 {
     Magick::Image image((const char*)msg);
@@ -175,9 +176,99 @@ void loadImage( const char* msg)
     // ----------------------------------
     // add the window
     // ----------------------------------
-    newWindow->setWID(my_id_pool.getID());
+    newWindow->setOID(my_id_pool.getID());
     m_windowList.push_front (newWindow);
-    printf("Add window with ID: %d\n",newWindow->getWID());
+    printf("Add window with ID: %d\n",newWindow->getOID());
+}
+bool checkWinHit(vec2f_P vec, int UserID, int button, int state)
+{
+    bool hit  = false;
+
+    csWindow::list_iter iter;
+    for(iter=m_windowList.begin(); iter!=m_windowList.end(); iter++)
+    {
+        csWindow* window= *iter;
+        if((window->getPosX()+window->getWidth()*.5)>vec->x && (window->getPosX()-window->getWidth()*.5)<vec->x)
+        {
+            hit = true;
+            if((window->getPosY()+window->getHeight()*.5)>vec->y && (window->getPosY()-window->getHeight()*.5)<vec->y)
+                hit = true;
+            else
+                hit = false;
+        }
+
+        if(hit)
+        {
+            if(state==CGLX_DOWN)
+            {
+                if(window->getUID()==-1)
+                {
+                    window->setState(vec->x, vec->y, button, state);
+                    window->setUID(UserID);
+                    iter_swap(iter,m_windowList.begin());
+
+                    // add object to interaction map
+                    m_InteractionMap.insert(std::pair<int,csWindow*>(UserID, window));
+
+                    //printf("Set State\n");
+                    // -----------------------------------------
+                    // we might want to announce this hit to the
+                    // database server to lock the object
+                    // -----------------------------------------
+                    if(db_device_ID!=-1)
+                    {
+
+                    }
+
+                    // we return the first match for a user id
+                    return(true);
+                }
+            }
+            else
+            {
+                if(window->getUID() == UserID)
+                {
+                    // remove object from interaction map
+                    m_InteractionMap.erase(UserID);
+
+                    window->resetState();
+                    window->setUID(-1);
+
+                    //printf("Reset\n");
+                    // -----------------------------------------
+                    // we might want to announce this release to
+                    // the database server to lock the object
+                    // -----------------------------------------
+                    if(db_device_ID!=-1)
+                    {
+
+                    }
+
+                    // we return the first match for a user id
+                    return(true);
+                }
+            }
+        }
+        else
+        {
+            if(window->getUID() == UserID)
+            {
+                window->resetState();
+                window->setUID(-1);
+
+                //printf("Reset\n");
+                // -----------------------------------------
+                // we might want to announce this release to
+                // the database server to lock the object
+                // -----------------------------------------
+                if(db_device_ID!=-1)
+                {
+
+                }
+            }
+        }
+    }
+    return false;
 }
 
 // -------------------------------------------------------------------------------------+
@@ -185,7 +276,6 @@ void loadImage( const char* msg)
 // -------------------------------------------------------------------------------------+
 void displayfunc(void)
 {
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
@@ -199,14 +289,12 @@ void displayfunc(void)
         (*riter)->draw();
     }
 }
-
 void init(void)
 { 
     glClearColor (0.0, 0.0, 0.0, 0.0);
     glShadeModel(GL_SMOOTH); 							// The Default coloring style 
     //glEnable(GL_DEPTH_TEST);
 }
-
 void reshapefunc(int w, int h)
 {  
     glViewport (0, 0, (GLsizei) w, (GLsizei) h);
@@ -322,7 +410,6 @@ void customMSGfunc(int len, unsigned char *msg)
         }
     }cglXUpdateDone();
 
-
     // --------------------------------------------------------------
     // need to send info about the new  object to the DataBase Server
     // --------------------------------------------------------------
@@ -331,97 +418,6 @@ void customMSGfunc(int len, unsigned char *msg)
     // --------------------------------------------------------------
     cglXPostRedisplay();
 }
-bool checkWinHit(vec2f_P vec, int UserID, int button, int state)
-{
-    bool hit  = false;
-
-    csWindow::list_iter iter;
-    for(iter=m_windowList.begin(); iter!=m_windowList.end(); iter++)
-    {
-        csWindow* window= *iter;
-        if((window->getPosX()+window->getWidth()*.5)>vec->x && (window->getPosX()-window->getWidth()*.5)<vec->x)
-        {
-            hit = true;
-            if((window->getPosY()+window->getHeight()*.5)>vec->y && (window->getPosY()-window->getHeight()*.5)<vec->y)
-                hit = true;
-            else
-                hit = false;
-        }
-
-        if(hit)
-        {
-            if(state==CGLX_DOWN)
-            {
-                if(window->getUID()==-1)
-                {
-                    window->setState(vec->x, vec->y, button, state);
-                    window->setUID(UserID);
-                    iter_swap(iter,m_windowList.begin());
-
-                    // add object to interaction map
-                    m_InteractionMap.insert(std::pair<int,csWindow*>(UserID, window));
-
-                    //printf("Set State\n");
-                    // -----------------------------------------
-                    // we might want to announce this hit to the
-                    // database server to lock the object
-                    // -----------------------------------------
-                    if(db_device_ID!=-1)
-                    {
-
-                    }
-
-                    // we return the first match for a user id
-                    return(true);
-                }
-            }
-            else
-            {
-                if(window->getUID() == UserID)
-                {
-                    // remove object from interaction map
-                    m_InteractionMap.erase(UserID);
-
-                    window->resetState();
-                    window->setUID(-1);
-
-                    //printf("Reset\n");
-                    // -----------------------------------------
-                    // we might want to announce this release to
-                    // the database server to lock the object
-                    // -----------------------------------------
-                    if(db_device_ID!=-1)
-                    {
-
-                    }
-
-                    // we return the first match for a user id
-                    return(true);
-                }
-            }
-        }
-        else
-        {
-            if(window->getUID() == UserID)
-            {
-                window->resetState();
-                window->setUID(-1);
-
-                //printf("Reset\n");
-                // -----------------------------------------
-                // we might want to announce this release to
-                // the database server to lock the object
-                // -----------------------------------------
-                if(db_device_ID!=-1)
-                {
-
-                }
-            }
-        }
-    }
-    return false;
-}
-
 void mousefunc(int button, int state, int x, int y)
 {
     static vec2f_S vec;
@@ -473,7 +469,7 @@ void motionfunc(int x,int y)
 
     if(cglXUpdateFirst())
     {
-        csWindow::iter iter = m_InteractionMap.find(cglxEM::getUID());
+        csWindow::im_iter iter = m_InteractionMap.find(cglxEM::getUID());
         if(iter!=m_InteractionMap.end())
         {
             csWindow* window = m_InteractionMap[cglxEM::getUID()];
@@ -524,7 +520,6 @@ void devnotifyfunc(CS_DEVICE_P dev)
         }
     }
 }
-
 int main(int argc, char** argv)
 {  
     cglXInit(&argc, argv);
@@ -532,7 +527,7 @@ int main(int argc, char** argv)
     cglXInitWindowSize (640, 480);
 
     cglXCreateWindow ("csimgview");
-    cglXInitWindowPosition (100, 100);
+    cglXInitWindowPosition (600, 100);
     init ();
 
     // ----------------------------------
@@ -548,11 +543,15 @@ int main(int argc, char** argv)
 
     cglXMainLoop();
 
-
     // ----------------------------------
     // clean up interaction map
     // ----------------------------------
     m_InteractionMap.clear();
+
+    // ----------------------------------
+    // clean up object map
+    // ----------------------------------
+    m_DBObjectMap.clear();
 
     // ----------------------------------
     // clean up our windows
