@@ -28,10 +28,22 @@
 // Includes
 // -------------------------------------------------------------------------------------+
 
-
 #include "main.h"
 
+// -------------------------------------------------------------------------------------+
+// Global
+// -------------------------------------------------------------------------------------+
+int     db_device_ID    = -1;
 
+// -------------------------------------------------------------------------------------+
+// This is our window list
+// -------------------------------------------------------------------------------------+
+std::list<csWindow*> m_windowList;
+std::map<int,csWindow*> m_InteractionMap;
+
+// -------------------------------------------------------------------------------------+
+// CLASS IMPLEMENTATION
+// -------------------------------------------------------------------------------------+
 class IDPool
 {
 public:
@@ -89,20 +101,13 @@ private:
     std::list<int> id_pool;
 };
 
-
-IDPool my_id_pool;
+IDPool  my_id_pool;
 
 // -------------------------------------------------------------------------------------+
-// This is our window list
+// FUNCTION IMPLEMENTATION
 // -------------------------------------------------------------------------------------+
-std::list<csWindow*> m_windowList;
-
-std::map<int,csWindow*> m_InteractionMap;
-
-
 void transPointerPos(vec2f_P vec)
 {
-
     float 	transx		= 0.0f;
     float 	transy		= 0.0f;
     float	ratio		= cglx::getHeadRatio();
@@ -131,11 +136,53 @@ void transPointerPos(vec2f_P vec)
     //printf("Out-> X: %f Y: %f\n\n",vec->x,vec->y);
 }
 
+void loadImage( const char* msg)
+{
+    Magick::Image image((const char*)msg);
+    printf("Image %s W: %d H: %d\n",image.fileName().c_str(),(int)image.baseColumns(),(int)image.baseRows());
+
+    // ------------------------------------
+    // add a window
+    // ------------------------------------
+    csWindow    *newWindow  = new csWindow();
+    newWindow->setImageDim(image.baseColumns(), image.baseRows());
+
+    // ------------------------------------
+    // create a texture
+    // ------------------------------------
+
+    // make ImageMagick object / read file into memory
+    Magick::Blob blob;
+    // set RGBA output format
+    image.magick("RGBA");
+    // write to BLOB in RGBA format
+    image.write(&blob);
+
+    // create the temporary Texture
+    GLuint GLtexture;
+    glGenTextures(1, &GLtexture);
+    // bind the texture to the next thing we make
+    glBindTexture(GL_TEXTURE_2D, GLtexture);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    gluBuild2DMipmaps(GL_TEXTURE_2D, 4, image.columns(), image.rows(), GL_RGBA, GL_UNSIGNED_BYTE, blob.data());
+
+    glDisable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    newWindow->setTID(GLtexture);
+
+    // ----------------------------------
+    // add the window
+    // ----------------------------------
+    newWindow->setWID(my_id_pool.getID());
+    m_windowList.push_front (newWindow);
+    printf("Add window with ID: %d\n",newWindow->getWID());
+}
 
 // -------------------------------------------------------------------------------------+
-// Implementation
+// CGLX Implementation
 // -------------------------------------------------------------------------------------+
-
 void displayfunc(void)
 {
 
@@ -147,17 +194,10 @@ void displayfunc(void)
     // ----------------------
     // draw the window list
     // ----------------------
-
-    /*for (csWindow::list_iter iter = m_windowList.begin(); iter!=m_windowList.end(); iter++)
-    {
-        (*iter)->draw();
-    }*/
-
     for (csWindow::list_riter riter = m_windowList.rbegin(); riter!=m_windowList.rend(); riter++)
     {
         (*riter)->draw();
     }
-    //cglXPostRedisplay();
 }
 
 void init(void)
@@ -213,49 +253,73 @@ void customMSGfunc(int len, unsigned char *msg)
     {
         //printf("UID: %d\nMSG len: %d\nMSG: %s\n",cglxDM::getDID(),len,msg);
 
-        Magick::Image image((const char*)msg);
-        printf("Image %s W: %d H: %d\n",image.fileName().c_str(),(int)image.baseColumns(),(int)image.baseRows());
+        // ----------------------------------------------------
+        // check if this message comes from our database server
+        // ----------------------------------------------------
+        // This is not completely clean, the servers need to
+        // identify them because all server types can send
+        // custom messages. For now we start only servers
+        // that we know ......
+        // ----------------------------------------------------
 
-        // ------------------------------------
-        // add a window
-        // ------------------------------------
-        csWindow    *newWindow  = new csWindow();
-        newWindow->setImageDim(image.baseColumns(), image.baseRows());
-
-        // ------------------------------------
-        // create a texture
-        // ------------------------------------
-
-        // make ImageMagick object / read file into memory
-        Magick::Blob blob;
-        // set RGBA output format
-        image.magick("RGBA");
-        // write to BLOB in RGBA format
-        image.write(&blob);
-
-        // create the temporary Texture
-        GLuint GLtexture;
-        glGenTextures(1, &GLtexture);
-        // bind the texture to the next thing we make
-        glBindTexture(GL_TEXTURE_2D, GLtexture);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-        gluBuild2DMipmaps(GL_TEXTURE_2D, 4, image.columns(), image.rows(), GL_RGBA, GL_UNSIGNED_BYTE, blob.data());
-        //glTexImage2D(GL_TEXTURE_2D, 0, 4, image.columns(), image.rows(), 0, GL_RGB, GL_UNSIGNED_BYTE, blob.data());
-
-        glDisable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        newWindow->setTID(GLtexture);
-
-        // ----------------------------------
-        // add the window
-        // ----------------------------------
-        newWindow->setWID(my_id_pool.getID());
-        //m_windowList.push_back (newWindow);
-        m_windowList.push_front (newWindow);
-
-        printf("Add window with ID: %d\n",newWindow->getWID());
+        if(db_device_ID!=-1 && cglxEM::getUID()==db_device_ID)
+        {
+            // ------------------------------------------
+            // This is a message from the database server
+            //
+            // We need to define the protocoll to talk
+            // with the database server and add it to
+            // the message.
+            // ------------------------------------------
+            // Possible message types are:
+            //
+            //  (Chris and Kai will define the protocol)
+            //
+            // ------------------------------------------
+            // for now the database server bounces back
+            // the url.
+            // ------------------------------------------
+            loadImage(( const char*) msg);
+        }
+        else
+        {
+            // ------------------------------------------
+            // This is a message from another server type
+            // in our case a custom server (csgui).
+            // If we have a database server we send him
+            // the url...
+            //
+            // If not we just load an image...
+            // ------------------------------------------
+            if(db_device_ID!=-1)
+            {
+                // ---------------------------------------
+                // We need to define the protocoll to talk
+                // with the database server and add it to
+                // the message.
+                // ---------------------------------------
+                // Possible message types are:
+                //
+                //  - CREATE:
+                //  - DELETE:
+                //  - CLONE:
+                //  - SAVE:
+                //
+                //  (Chris and Kai will define the protocol)
+                //
+                // ---------------------------------------
+                // for now we just send the URL
+                // ---------------------------------------
+                if(!cglxDM::sendData(db_device_ID, (unsigned char*) msg, len))
+                {
+                    printf("Send Failed\n");
+                }
+            }
+            else
+            {
+                loadImage(( const char*) msg);
+            }
+        }
     }cglXUpdateDone();
 
 
@@ -296,9 +360,18 @@ bool checkWinHit(vec2f_P vec, int UserID, int button, int state)
 
                     // add object to interaction map
                     m_InteractionMap.insert(std::pair<int,csWindow*>(UserID, window));
-                    printf("Set State\n");
 
-                    // we return the first match
+                    //printf("Set State\n");
+                    // -----------------------------------------
+                    // we might want to announce this hit to the
+                    // database server to lock the object
+                    // -----------------------------------------
+                    if(db_device_ID!=-1)
+                    {
+
+                    }
+
+                    // we return the first match for a user id
                     return(true);
                 }
             }
@@ -311,9 +384,18 @@ bool checkWinHit(vec2f_P vec, int UserID, int button, int state)
 
                     window->resetState();
                     window->setUID(-1);
-                    printf("Reset\n");
 
-                    // we return the first match
+                    //printf("Reset\n");
+                    // -----------------------------------------
+                    // we might want to announce this release to
+                    // the database server to lock the object
+                    // -----------------------------------------
+                    if(db_device_ID!=-1)
+                    {
+
+                    }
+
+                    // we return the first match for a user id
                     return(true);
                 }
             }
@@ -324,7 +406,16 @@ bool checkWinHit(vec2f_P vec, int UserID, int button, int state)
             {
                 window->resetState();
                 window->setUID(-1);
-                printf("Reset\n");
+
+                //printf("Reset\n");
+                // -----------------------------------------
+                // we might want to announce this release to
+                // the database server to lock the object
+                // -----------------------------------------
+                if(db_device_ID!=-1)
+                {
+
+                }
             }
         }
     }
@@ -346,7 +437,7 @@ void mousefunc(int button, int state, int x, int y)
         }
         else
         {
-            printf("No hit\n");
+            //printf("No hit\n");
         }
 
         switch (button)
@@ -414,6 +505,25 @@ void motionfunc(int x,int y)
 
     cglXPostRedisplay();
 }
+void devnotifyfunc(CS_DEVICE_P dev)
+{
+    if(dev->state == CGLX_DEV_ON)
+    {
+        if(dev->type == CS_HCI_APPL_SERV)
+        {
+            printf("Our Database server connected from IP: %s DID: %d\n", dev->hostname.c_str(), dev->ID);
+            db_device_ID    = dev->ID;
+        }
+    }
+    else if(dev->state == CGLX_DEV_OFF)
+    {
+        if(dev->type == CS_HCI_APPL_SERV)
+        {
+            printf("Our Database server has disconnected from IP: %s DID: %d\n", dev->hostname.c_str(), dev->ID);
+            db_device_ID    = -1;
+        }
+    }
+}
 
 int main(int argc, char** argv)
 {  
@@ -425,13 +535,17 @@ int main(int argc, char** argv)
     cglXInitWindowPosition (100, 100);
     init ();
 
+    // ----------------------------------
     // register callbacks
+    // ----------------------------------
     cglXDisplayFunc     (displayfunc);
     cglXReshapeFunc     (reshapefunc);
     cglXKeyboardFunc    (normakKeysfunc);
     cglXMouseFunc       (mousefunc);
     cglXMotionFunc      (motionfunc);
     cglXCustomMsgFunc   (customMSGfunc);
+    cglXDeviceNotifyFunc(devnotifyfunc);// device notification function
+
     cglXMainLoop();
 
 
