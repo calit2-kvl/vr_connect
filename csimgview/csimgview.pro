@@ -67,8 +67,8 @@ linux-g++ {
 # ---------------------------------------------------------------------------
 linux-g++-64 {
  QT                   = 
- LIBS                += -L/usr/lib64 -L/usr/local/lib/ -lMagick++ -L/usr/local/cglX/lib/ -lcglX
- INCLUDEPATH         += /usr/local/include/ImageMagick /usr/include/GL /usr/local/cglX/include
+ LIBS                += -L/usr/lib64 -L/usr/local/lib/ -lMagick++ -L/usr/local/cglX/lib/ -lcglX -L/opt/cglx/lib64
+ INCLUDEPATH         += /usr/local/include/ImageMagick /usr/include/GL /usr/local/cglX/include /opt/cglx/include
  # clean it
  CLEAN_FILES          = ./$${DESTDIR}$${TARGET}
 }

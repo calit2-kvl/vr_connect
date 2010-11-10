@@ -22,9 +22,18 @@
  +-------------------------------------------------------------------------------+ */
 
 #include "csconnect.h"
+#include <stdio.h>
 
 int main(int argc, char **argv)
 {
+	csconnect::oid oid0, oid1;
+	
+	oid1.a = 8589589;
+	oid1.b = 65387;
+
+	oid0 = oid1;
+
+	printf("%i\n", oid0.b);
     return 0;
 }
 

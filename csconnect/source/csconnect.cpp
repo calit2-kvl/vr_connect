@@ -22,7 +22,7 @@
  +-------------------------------------------------------------------------------+ */
 
 #include "csconnect.h"
-//#include <uuid/uuid.h>
+#include <uuid/uuid.h>
 
 #include <string.h>
 #include <algorithm>
@@ -30,10 +30,10 @@
 
 void oid_gen(csconnect::oid& object_id)
 {
-//    uuid_t tmp;
-//    uuid_generate(tmp);
-//    
-//    memcpy(object_id.data, tmp, 12);
+    uuid_t tmp;
+    uuid_generate(tmp);
+    
+    memcpy(object_id.data, tmp, 12);
 }
 
 csconnect::session::session(
