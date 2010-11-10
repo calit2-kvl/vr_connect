@@ -41,6 +41,7 @@ using namespace cglx;
 
 #include <map>
 #include <stdint.h>
+#include <pthread.h>
 #include <Magick++.h>
 
 // -------------------------------------------------------------------------------------+

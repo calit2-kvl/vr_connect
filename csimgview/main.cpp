@@ -37,6 +37,9 @@
 // -------------------------------------------------------------------------------------+
 int     db_device_ID    = -1;
 
+// loader mutex
+pthread_mutex_t obj_list_mutex;
+
 // -------------------------------------------------------------------------------------+
 // This is our window list (later on we have objects and then subclass a window)
 // -------------------------------------------------------------------------------------+
@@ -139,14 +142,9 @@ void transPointerPos(vec2f_P vec)
 }
 void loadImage( const char* msg)
 {
+
     Magick::Image image((const char*)msg);
     printf("Image %s W: %d H: %d\n",image.fileName().c_str(),(int)image.baseColumns(),(int)image.baseRows());
-
-    // ------------------------------------
-    // add a window
-    // ------------------------------------
-    csWindow    *newWindow  = new csWindow();
-    newWindow->setImageDim(image.baseColumns(), image.baseRows());
 
     // ------------------------------------
     // create a texture
@@ -171,12 +169,16 @@ void loadImage( const char* msg)
     glDisable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    // ------------------------------------
+    // add a window
+    // ------------------------------------
+    csWindow    *newWindow  = new csWindow();
+    newWindow->setImageDim(image.baseColumns(), image.baseRows());
     newWindow->setTID(GLtexture);
-
-    // ----------------------------------
-    // add the window
-    // ----------------------------------
     newWindow->setOID(my_id_pool.getID());
+
+
+
     m_windowList.push_front (newWindow);
     printf("Add window with ID: %d\n",newWindow->getOID());
 }
