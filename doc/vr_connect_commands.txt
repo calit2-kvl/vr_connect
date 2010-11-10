@@ -1,0 +1,34 @@
+For a basic image viewer we need
+
+* data object description (immutable after creation) : CREATE | READ | DELETE
+ - ID (uint64) : GENERATED
+ - URI (string) - needs to uniquely identify the dataset : REQUIRED for create
+ - width, height in pixels (int, int) : OPTIONAL - can be 'created' after object creation - but once created is not updateable
+
+* display object descirption  : READ | UPDATE | DELETE # CLONE | MERGE
+ # later - modelview matrix (4x4 float array)
+ - (normalized) xpos, ypos, zpos (float)
+ - (normalized) xscale, yscale, zscale (float)
+
+
+Creation message
+
+client_id:object_type:uri -> object_id:uri/FAIL
+
+OPTIONAL metadata calls:
+object_id:attrib:value -> OK/FAIL
+
+(for now)
+
+display object message
+UPDATE -> object_id:attrib:type:value -> OK/FAIL/ATTRIB_CHANGED + new_values (in future object_id)
+
+----
+Joining/creating etc
+
+list_sessions -> list of sessions
+join_session(session_name) - active, saved, or new session
+	-> reply with current contents of the session # json/bson
+
+
+
