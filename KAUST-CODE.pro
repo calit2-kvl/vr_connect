@@ -2,5 +2,5 @@ TEMPLATE = subdirs
 CONFIG += ordered
 SUBDIRS =   ./csimgview \
 	    ./csgui \
-	    ./csconnect
-
+	    ./csconnect \
+        ./csdbserv

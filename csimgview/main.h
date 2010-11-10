@@ -2,26 +2,28 @@
 +---------------------------------------------------------------------------------------+
 | @BEGIN_COPYRIGHT                                                                      |
 |                                                                                       |
-| Copyright (C) XXXX-XXXX, Wo ever                                                      |
-| All Rights Reserved for ...                                                           |
+| Copyright (C) 2010-2015, The Regents of the University of California &                |
+| King Abdula University of Science and Technology                                      |
+| All Rights Reserved.                                                                  |
+|                                                                                       |
+|                                                                                       |
+| Prototyped and developed By:                                                          |
+|    Kai-Uwe Doerr       {kdoerr@usd.edu}                                               |
+|    Christopher Knox  	 {christopher.knox@kaust.edu.sa}                                |
 |                                                                                       |
 | @END_COPYRIGHT                                                                        |
 +---------------------------------------------------------------------------------------+
-|                                               
-| Component  : 
-| Filename   : main.cpp
-| Sourcefile : 
-| Language   : C++
-|                                               
-+----------------------------- Revision Information-------------------------------------+
-| $Author: XXX $
-| $Revision: 0.0.0.0 $
-| $Date: 0 $
-| $RCSfile: 0 $
-+---------------------------------------------------------------------------------------+
-|                        This is a simple example program.
-|              (It should help you to get started with CGLX programming) 
 |
+| Component  :
+| Filename   :
+| Sourcefile :
+| Language   : C++
+|
++----------------------------- Revision Information-------------------------------------+
+| $Author: kdoerr $
+| $Revision: 1.1.1.1 $
+| $Date: 2010/10/22 19:14:22 $
+| $RCSfile: main.h,v $
 +---------------------------------------------------------------------------------------+
 */
 // -------------------------------------------------------------------------------------+
@@ -38,6 +40,7 @@
 using namespace cglx;
 
 #include <map>
+#include <stdint.h>
 #include <Magick++.h>
 
 // -------------------------------------------------------------------------------------+
@@ -54,8 +57,8 @@ public:
     {
         //container information
         UID         =   -1;
-        winID       =   -1;
-        TextID      =   0;
+        OID         =   0;
+        TID         =   0;
         width       =   1;
         height      =   1;
         posx        =   0.0f;
@@ -77,41 +80,41 @@ public:
      */
     virtual ~csWindow()
     {
-        glDeleteTextures(1, &TextID);
+        glDeleteTextures(1, &TID);
     }
 
-    int 	getWID(void)        {return winID;}
-    int 	getUID(void)        {return UID;}
-    int 	getTID(void)        {return TextID;}
-    float 	getPosX(void)       {return posx;}
-    float 	getPosY(void)       {return posy;}
-    float 	getWidth(void)      {return width;}
-    float 	getHeight(void)     {return height;}
-    int 	getButton(void)     {return button;}
+    uint64_t    getOID(void)            {return OID;}
+    int         getUID(void)            {return UID;}
+    int         getTID(void)            {return TID;}
+    float       getPosX(void)           {return posx;}
+    float       getPosY(void)           {return posy;}
+    float       getWidth(void)          {return width;}
+    float       getHeight(void)         {return height;}
+    int         getButton(void)         {return button;}
 
-    void 	setWID(int _WID)    {winID  = _WID;}
-    void 	setUID(int _UID)    {UID    = _UID;}
-    void 	setTID(GLuint _TID) {TextID = _TID;}
-    void 	setPosX(float x)    {posx   = x;}
-    void 	setPosY(float y)    {posy   = y;}
-    void 	setWidth(float w)   {width  = w;}
-    void 	setHeight(float h)  {height = h;}
+    void        setOID(uint64_t _OID)   {OID    = _OID;}
+    void        setUID(int _UID)        {UID    = _UID;}
+    void        setTID(GLuint _TID)     {TID    = _TID;}
+    void        setPosX(float x)        {posx   = x;}
+    void        setPosY(float y)        {posy   = y;}
+    void        setWidth(float w)       {width  = w;}
+    void        setHeight(float h)      {height = h;}
 
-    void 	setState(float _hit_posx, float _hit_posy, int _button, int _state)
+    void        setState(float _hit_posx, float _hit_posy, int _button, int _state)
     {
         hit_posx    = _hit_posx;
         hit_posy    = _hit_posy;
         button      = _button;
         state       = _state;
     }
-    void    resetState(void)
+    void        resetState(void)
     {
         hit_posx    =   -1;
         hit_posy    =   -1;
         button      =   -1;
         state       =   -1;
     }
-    void 	move(float x, float y)
+    void        move(float x, float y)
     {
         posx	+= x-hit_posx;
         posy	+= y-hit_posy;
@@ -119,7 +122,7 @@ public:
         hit_posy = y;
         //printf("Pos x:%f y:%f\n",posx,posy);
     }
-    void 	scale(float x, float y)
+    void        scale(float x, float y)
     {
         float delta	=  1+(x-hit_posx);
         scalex=delta;
@@ -140,7 +143,7 @@ public:
         hit_posy 	= y;
     }
     // content
-    void 	setImageDim(float _w, float _h)
+    void        setImageDim(float _w, float _h)
     {
         c_width     =   _w;
         c_height    =   _h;
@@ -155,10 +158,10 @@ public:
     /*!	\fn void draw(void)
      *  \brief Draw a textured rectangle
      */
-    void draw(void)
+    void        draw(void)
     {
-        if(TextID==0)return;
-        glBindTexture(GL_TEXTURE_2D, TextID);
+        if(TID==0)return;
+        glBindTexture(GL_TEXTURE_2D, TID);
         glEnable(GL_TEXTURE_2D);
 
         float a=1;
@@ -210,14 +213,19 @@ public:
     typedef std::list<csWindow*>::iterator list_iter;
     typedef std::list<csWindow*>::reverse_iterator list_riter;
 
-    typedef std::map<int, csWindow*>::iterator iter;
-    typedef std::map<int, csWindow*>::reverse_iterator riter;
+    // interaction map iterator
+    typedef std::map<int, csWindow*>::iterator im_iter;
+    typedef std::map<int, csWindow*>::reverse_iterator im_riter;
+
+    // object map iterator
+    typedef std::map<uint64_t, csWindow*>::iterator om_iter;
+    typedef std::map<uint64_t, csWindow*>::reverse_iterator om_riter;
 
 private:
     // container information
     int         UID;
-    int         winID;
-    GLuint      TextID;
+    uint64_t    OID;        // database object ID
+    GLuint      TID;
     float       posx;
     float       posy;
     float       scalex;
