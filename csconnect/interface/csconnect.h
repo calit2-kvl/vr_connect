@@ -71,6 +71,7 @@ namespace csconnect
         oid object_id;
         int client_id;
         int user_id;
+        int local_id;
     };
     
     /** data required to describe an image source */
@@ -118,10 +119,12 @@ namespace csconnect
     {
     public:
         /* connect to or create a session - info struct is filled with the current state of the session */
-        session(session_info& info, const std::string& database_server, const std::string& session_name) {}
+        session(session_info& info, const std::string& database_server, const std::string& session_name);
         ~session() {}
         
         bool get_session_updates(session_info& info);
+
+        session_info m_info;
     };
     
     namespace session_utils
@@ -130,16 +133,13 @@ namespace csconnect
         bool server_sessions(std::string& session_list, const std::string& server_name);
         
         /** create an image */
-        bool create_image_source(image_source& source, session& db_serv, uint64_t local_id);
+        bool create_image_source(image_source& source, session& db_serv);
         /** add image metadata */
         bool update_image_source(image_source& source, session& db_serv);
         /** create an image view */
-        bool create_image_view(image_view& view, session& db_serv, uint64_t local_id);
+        bool create_image_view(image_view& view, session& db_serv);
         /** update an image_view */
         bool update_image_view(image_view& view, session& db_serv);
-        
-        
-        
     }
 }
 
