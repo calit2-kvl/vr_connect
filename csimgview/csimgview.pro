@@ -46,9 +46,11 @@ OBJECTS_DIR           = .obj
 # The sources
 # ---------------------------------------------------------------------------
 
-HEADERS              += main.h
+HEADERS              += main.h \
+                        ../common/cJSON.h
 
-SOURCES              += main.cpp
+SOURCES              += main.cpp \
+                        ../common/cJSON.c
 
 # ---------------------------------------------------------------------------
 # linux

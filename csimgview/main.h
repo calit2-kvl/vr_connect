@@ -43,6 +43,7 @@ using namespace cglx;
 #include <stdint.h>
 #include <pthread.h>
 #include <Magick++.h>
+#include "../common/cJSON.h"
 
 // -------------------------------------------------------------------------------------+
 // Prototype
@@ -59,6 +60,7 @@ public:
         //container information
         UID         =   -1;
         OID         =   0;
+        session_obj =   false;
         TID         =   0;
         width       =   1;
         height      =   1;
@@ -225,7 +227,8 @@ public:
 private:
     // container information
     int         UID;
-    uint64_t    OID;        // database object ID
+    uint64_t    OID;            // object ID
+    bool        session_obj;    // true if object is in database
     GLuint      TID;
     float       posx;
     float       posy;

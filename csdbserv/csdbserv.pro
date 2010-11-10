@@ -28,9 +28,11 @@ MY_ADD_DIR = ../addonlibs
 # ---------------------------------------------------------------------------
 # The sources
 # ---------------------------------------------------------------------------
-HEADERS = $${MY_INCDIR}/main.h
+HEADERS = $${MY_INCDIR}/main.h \
+          ../common/cJSON.h
     
-SOURCES = $${MY_SRCDIR}/main.cpp
+SOURCES = $${MY_SRCDIR}/main.cpp \
+          ../common/cJSON.c
     
 
 # ---------------------------------------------------------------------------

@@ -108,6 +108,9 @@ private:
 };
 IDPool  my_id_pool;
 
+// this is the fake object id pool
+IDPool  fake_oid_pool(0);
+
 // -------------------------------------------------------------------------------------+
 // FUNCTION IMPLEMENTATION
 // -------------------------------------------------------------------------------------+
@@ -341,8 +344,6 @@ void customMSGfunc(int len, unsigned char *msg)
 {
     if(cglXUpdateShared())
     {
-        //printf("UID: %d\nMSG len: %d\nMSG: %s\n",cglxDM::getDID(),len,msg);
-
         // ----------------------------------------------------
         // check if this message comes from our database server
         // ----------------------------------------------------
@@ -357,11 +358,17 @@ void customMSGfunc(int len, unsigned char *msg)
             // ------------------------------------------
             // This is a message from the database server
             //
-            // We need to define the protocoll to talk
+            // We need to define the protocol to talk
             // with the database server and add it to
             // the message.
             // ------------------------------------------
             // Possible message types are:
+            //
+            //  - CREATE:
+            //  - UPDATE:
+            //  - DELETE:
+            //  - CLONE:
+            //  - SAVE:
             //
             //  (Chris and Kai will define the protocol)
             //
@@ -369,7 +376,31 @@ void customMSGfunc(int len, unsigned char *msg)
             // for now the database server bounces back
             // the url.
             // ------------------------------------------
-            loadImage(( const char*) msg);
+            //loadImage(( const char*) msg);
+
+            // update the object ID -> this means that
+            // this object is known to the database
+            // we find the object via the id that we gave
+            // if when we created the object on the client
+            // side. Once we fouind it we exchange the OID
+            // with the one we get from the database and
+            // update the object map.
+
+            // ----------------------------------------
+            // read a json message
+            // ----------------------------------------
+            cJSON *json_read, *item;
+            char *out;
+            json_read   = cJSON_Parse((const char*)msg);
+            item        = cJSON_GetObjectItem(json_read,"CMD");
+            // -------------------------------------
+            // Command type interpretation
+            // -------------------------------------
+            if(strcmp(item->valuestring,"UPDATE")==0)
+            {
+
+            }
+            cJSON_Delete(json_read);
         }
         else
         {
@@ -400,15 +431,36 @@ void customMSGfunc(int len, unsigned char *msg)
                 // ---------------------------------------
                 // for now we just send the URL
                 // ---------------------------------------
-                if(!cglxDM::sendData(db_device_ID, (unsigned char*) msg, len))
+
+                // ----------------------------------------
+                // create a json message
+                // ----------------------------------------
+                char *out;
+                cJSON *json_send;
+                json_send=cJSON_CreateObject();
+                cJSON_AddStringToObject(json_send,"CMD",     "CREATE");
+                cJSON_AddNumberToObject(json_send,"CID",     0);
+                cJSON_AddStringToObject(json_send,"TYPE",    "Image");
+                cJSON_AddStringToObject(json_send,"URI",     (const char*)msg);
+                //cJSON_AddItemToObject(root, "ENTRY", cmd=cJSON_CreateObject());
+                //cJSON_AddStringToObject(cmd,"CMD",		"CREATE");
+
+                //out=cJSON_Print(json_send);
+                out=cJSON_PrintUnformatted(json_send);
+                cJSON_Delete(json_send);
+                //printf("%s %d\n",out,strlen(out));
+
+                if(!cglxDM::sendData(db_device_ID, (unsigned char*) out, strlen(out)))
                 {
                     printf("Send Failed\n");
                 }
+                free(out);
             }
-            else
-            {
-                loadImage(( const char*) msg);
-            }
+
+            // ---------------------------------------
+            // start image loading
+            // ---------------------------------------
+            loadImage(( const char*) msg);
         }
     }cglXUpdateDone();
 

@@ -65,8 +65,9 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
 {
     // very simple
     std::string message;
-    message.assign((const char*)data);
-    printf("My Server PID: %d Client Message: %s UID: %d msg-> %s \n",PID ,IP , UID, message.c_str());
+    message.assign((const char*)data,size);
+    //printf("My Server PID: %d Client Message: %s UID: %d msg-> %s \n",PID ,IP , UID, message.c_str());
+    //printf("Got: %s\n",message.c_str());
 
     // ---------------------------------------
     // We need to define the protocoll to talk
@@ -76,6 +77,7 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
     // Possible message types are:
     //
     //  - CREATE:
+    //  - UPDATE:
     //  - DELETE:
     //  - CLONE:
     //  - SAVE:
@@ -85,6 +87,67 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
     // ---------------------------------------
     // for now we just send the URL back
     // ---------------------------------------
+
+    cJSON *json_rec, *item;
+    char *out, *send_out;
+    json_rec    = cJSON_Parse(message.c_str());
+    item        = cJSON_GetObjectItem(json_rec,"CMD");
+
+    // -------------------------------------
+    // Command type reaction
+    // -------------------------------------
+    if(strcmp(item->valuestring,"CREATE")==0)
+    {
+        // ----------------------------------------
+        // read client object id
+        // ----------------------------------------
+        //item=cJSON_GetObjectItem(json_rec,"CID");
+        //int _cid=item->valueint;
+        int _cid=cJSON_GetObjectItem(json_rec,"CID")->valueint;
+
+        // ----------------------------------------
+        // create a unique object ID
+        // ----------------------------------------
+        uint64_t    uoid    = 0;
+
+        // ----------------------------------------
+        // create a json message
+        // ----------------------------------------
+        cJSON *json_send;
+        json_send=cJSON_CreateObject();
+        cJSON_AddStringToObject(json_send,"CMD",     "UPDATE");
+        cJSON_AddNumberToObject(json_send,"CID",     _cid);
+        cJSON_AddNumberToObject(json_send,"OID",     uoid);
+        send_out=cJSON_PrintUnformatted(json_send);
+        cJSON_Delete(json_send);
+
+        // ----------------------------------------
+        // we send this only to the creating client
+        // to update his object map
+        // ----------------------------------------
+        sendData((char*) send_out, strlen(send_out), PID);
+        free(send_out);
+    }
+    else if(strcmp(item->valuestring,"DELETE")==0)
+    {
+
+    }
+    else if(strcmp(item->valuestring,"CLONE")==0)
+    {
+
+    }
+    else if(strcmp(item->valuestring,"SAVE")==0)
+    {
+
+    }
+
+
+    out=cJSON_Print(json_rec);
+    cJSON_Delete(json_rec);
+    printf("%s\n",out);
+    free(out);
+
+
     sendData((char*)data, size);
 }
 // ------------------------------------------------------------------------------------------
@@ -176,9 +239,14 @@ int main( int argc, char ** argv )
     // --------------------------------------------
     startServer(contact_port);
 
+    // --------------------------------------------
     // enter a loop
+    // --------------------------------------------
     while (session_server->inUse())
     {
+        // ----------------------------------------
+        // some database management
+        // ----------------------------------------
         usleep(100);
     }
 
