@@ -30,12 +30,70 @@
 // Includes
 // -----------------------------------------------------------------------------+
 #include "main.h"
+#include <list>
 #include <string>
 
 // -----------------------------------------------------------------------------+
 // GLOBALS
 // -----------------------------------------------------------------------------+
 dbserver   *session_server  = NULL;
+class IDPool
+{
+public:
+    IDPool(int start_id=0){base_id_range = start_id;}
+    ~IDPool(){id_pool.clear();}
+
+    int getID(void)
+    {
+        // --------------------------------
+        // if pool is empty
+        // we return the first available id
+        // which is base_id_range.
+        // --------------------------------
+        if(id_pool.size()==0)
+        {
+            id_pool.push_back (base_id_range);
+            return (base_id_range);
+        }
+
+        int freeID 	= -1;
+        int count	= 0;
+
+        // check if we can re-use an id
+        std::list<int>::iterator it;
+        for ( it=id_pool.begin() ; it != id_pool.end(); it++ )
+        {
+            if(*it == -1)
+            {
+                freeID	= count + base_id_range;
+                *it		= freeID;
+                return freeID;
+            }
+            count++;
+        }
+        freeID	= count+base_id_range;
+
+        // we add an id if all are taken
+        id_pool.push_back (freeID);
+        return freeID;
+    }
+    void returnID(int id)
+    {
+        std::list<int>::iterator it;
+        for ( it=id_pool.begin() ; it != id_pool.end(); it++ )
+        {
+            if(*it == id)
+            {
+                *it=-1;
+            }
+        }
+    }
+protected:
+private:
+    int		base_id_range;
+    std::list<int> id_pool;
+};
+IDPool  obj_id_pool(100); // start with 100 as the first object ID
 
 // -----------------------------------------------------------------------------+
 // CLASS IMPLEMENTATION
@@ -77,7 +135,8 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
     // Possible message types are:
     //
     //  - CREATE:
-    //  - UPDATE:
+    //  - UPDATE: (OID,POS,...)
+    //  - ADD
     //  - DELETE:
     //  - CLONE:
     //  - SAVE:
@@ -88,10 +147,10 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
     // for now we just send the URL back
     // ---------------------------------------
 
-    cJSON *json_rec, *item;
+    cJSON *json_read, *item;
     char *out, *send_out;
-    json_rec    = cJSON_Parse(message.c_str());
-    item        = cJSON_GetObjectItem(json_rec,"CMD");
+    json_read   = cJSON_Parse(message.c_str());
+    item        = cJSON_GetObjectItem(json_read,"CMD");
 
     // -------------------------------------
     // Command type reaction
@@ -101,31 +160,58 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
         // ----------------------------------------
         // read client object id
         // ----------------------------------------
-        //item=cJSON_GetObjectItem(json_rec,"CID");
-        //int _cid=item->valueint;
-        int _cid=cJSON_GetObjectItem(json_rec,"CID")->valueint;
+        int _cid=cJSON_GetObjectItem(json_read,"CID")->valueint;
 
         // ----------------------------------------
         // create a unique object ID
+        // (Don't want to create Chris connect instance)
+        // for now we create our own id the CGLX way.
         // ----------------------------------------
-        uint64_t    uoid    = 0;
+        uint64_t    uoid    = (uint64_t)obj_id_pool.getID();
 
         // ----------------------------------------
         // create a json message
         // ----------------------------------------
-        cJSON *json_send;
+        cJSON *json_send=NULL;
         json_send=cJSON_CreateObject();
         cJSON_AddStringToObject(json_send,"CMD",     "UPDATE");
+        cJSON_AddStringToObject(json_send,"ATTR",    "OID");
         cJSON_AddNumberToObject(json_send,"CID",     _cid);
         cJSON_AddNumberToObject(json_send,"OID",     uoid);
         send_out=cJSON_PrintUnformatted(json_send);
         cJSON_Delete(json_send);
+        json_send=NULL;
 
         // ----------------------------------------
         // we send this only to the creating client
         // to update his object map
         // ----------------------------------------
         sendData((char*) send_out, strlen(send_out), PID);
+        free(send_out);
+
+        // ----------------------------------------
+        //  Send a CREATE to all other clients
+        // ----------------------------------------
+        json_send=cJSON_CreateObject();
+        cJSON_AddStringToObject(json_send,"CMD",     "CREATE");
+        cJSON_AddNumberToObject(json_send,"OID",     uoid);
+        cJSON_AddStringToObject(json_send,"TYPE",    "Image");
+        cJSON_AddStringToObject(json_send,"URI",     cJSON_GetObjectItem(json_read,"URI")->valuestring);
+
+        send_out=cJSON_PrintUnformatted(json_send);
+        cJSON_Delete(json_send);
+
+        sendData((char*) send_out, strlen(send_out), PID, true);
+        free(send_out);
+
+    }
+    else if(strcmp(item->valuestring,"UPDATE")==0)
+    {
+        // ----------------------------------------
+        //  Send an UPDATE to all other clients
+        // ----------------------------------------
+        send_out=cJSON_PrintUnformatted(json_read);
+        sendData((char*) send_out, strlen(send_out), PID, true);
         free(send_out);
     }
     else if(strcmp(item->valuestring,"DELETE")==0)
@@ -142,13 +228,13 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
     }
 
 
-    out=cJSON_Print(json_rec);
-    cJSON_Delete(json_rec);
-    printf("%s\n",out);
+    out=cJSON_Print(json_read);
+    cJSON_Delete(json_read);
+    //printf("%s\n",out);
     free(out);
 
 
-    sendData((char*)data, size);
+    //sendData((char*)data, size);
 }
 // ------------------------------------------------------------------------------------------
 //   Basic signal handling

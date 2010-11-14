@@ -17,6 +17,7 @@ QT  =
 # common settings  !! Use just the release
 # ---------------------------------------------------------------------------
 DESTDIR = ./bin
+ADD_INCDIR = ../csconnect/interface ../common
 MY_INCDIR = ./include
 MY_SRCDIR = ./src
 UI_DIR = .ui
@@ -29,9 +30,11 @@ MY_ADD_DIR = ../addonlibs
 # The sources
 # ---------------------------------------------------------------------------
 HEADERS = $${MY_INCDIR}/main.h \
+          ../csconnect/interface/csconnect.h \
           ../common/cJSON.h
     
 SOURCES = $${MY_SRCDIR}/main.cpp \
+          ../csconnect/source/csconnect.cpp \
           ../common/cJSON.c
     
 
@@ -40,8 +43,8 @@ SOURCES = $${MY_SRCDIR}/main.cpp \
 # -g++ 32bit
 # ---------------------------------------------------------------------------
 linux-g++ { 
-    LIBS += -L /usr/local/cglX/lib -lcglXnet
-    INCLUDEPATH += $${MY_INCDIR} /usr/local/cglX/include
+    LIBS += -L /usr/lib -luuid -L /usr/local/cglX/lib -lcglXnet
+    INCLUDEPATH += $${MY_INCDIR} $${ADD_INCDIR} /usr/local/cglX/include
     
     # clean it
     CLEAN_FILES += $$DESTDIR/$${TARGET}
@@ -52,8 +55,8 @@ linux-g++ {
 # -g++ 64bit
 # ---------------------------------------------------------------------------
 linux-g++-64 { 
-    LIBS += -L /usr/local/cglX/lib -lcglXnet
-    INCLUDEPATH += $${MY_INCDIR} /usr/local/cglX/include
+    LIBS += -L /usr/lib64 -luuid -L /usr/local/cglX/lib -lcglXnet
+    INCLUDEPATH += $${MY_INCDIR} $${ADD_INCDIR} /usr/local/cglX/include
     
     # clean it
     CLEAN_FILES += $$DESTDIR/$${TARGET}
@@ -66,7 +69,7 @@ linux-g++-64 {
 macx-g++ { 
     
     LIBS += -framework cglXnet
-    INCLUDEPATH += $${MY_INCDIR} 
+    INCLUDEPATH += $${MY_INCDIR} $${ADD_INCDIR}
     QMAKE_LFLAGS += -F../cglXlib/lib/
     
     # clean it
@@ -84,7 +87,7 @@ macx-xcode {
     ICON = .qrc/icons/cglxmac.icns
     LIBS += -framework \
         cglX
-    INCLUDEPATH += $${MY_INCDIR} \
+    INCLUDEPATH += $${MY_INCDIR} $${ADD_INCDIR} \
         ../cglXlib/include \
         ../addonlibs/
     QMAKE_LFLAGS += -F../cglXlib/lib/

@@ -40,6 +40,7 @@ DEFINES              += DEF_USE_CGLX
 # ---------------------------------------------------------------------------
 
 DESTDIR               = ./
+ADD_INCDIR            = ../csconnect/interface ../common
 OBJECTS_DIR           = .obj
 	
 # ---------------------------------------------------------------------------
@@ -59,7 +60,7 @@ SOURCES              += main.cpp \
 linux-g++ {
  QT                   = 
  LIBS                += -L/usr/lib -L/usr/local/cglX/lib/ -lcglX 
- INCLUDEPATH         += /usr/include/GL /usr/local/cglX/include
+ INCLUDEPATH         += $${ADD_INCDIR} /usr/local/cglX/include
  # clean it
  CLEAN_FILES          = ./$${DESTDIR}$${TARGET}
 }
@@ -70,7 +71,7 @@ linux-g++ {
 linux-g++-64 {
  QT                   = 
  LIBS                += -L/usr/lib64 -L/usr/local/lib/ -lMagick++ -L/usr/local/cglX/lib/ -lcglX -L/opt/cglx/lib64
- INCLUDEPATH         += /usr/local/include/ImageMagick /usr/include/GL /usr/local/cglX/include /opt/cglx/include
+ INCLUDEPATH         += /usr/local/include/ImageMagick $${ADD_INCDIR} /usr/local/cglX/include /opt/cglx/include
  # clean it
  CLEAN_FILES          = ./$${DESTDIR}$${TARGET}
 }

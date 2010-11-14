@@ -43,7 +43,7 @@ using namespace cglx;
 #include <stdint.h>
 #include <pthread.h>
 #include <Magick++.h>
-#include "../common/cJSON.h"
+#include "cJSON.h"
 
 // -------------------------------------------------------------------------------------+
 // Prototype
@@ -94,6 +94,8 @@ public:
     float       getWidth(void)          {return width;}
     float       getHeight(void)         {return height;}
     int         getButton(void)         {return button;}
+    float       getScaleX(void)         {return scalex;}
+    float       getScaleY(void)         {return scaley;}
 
     void        setOID(uint64_t _OID)   {OID    = _OID;}
     void        setUID(int _UID)        {UID    = _UID;}
@@ -102,6 +104,19 @@ public:
     void        setPosY(float y)        {posy   = y;}
     void        setWidth(float w)       {width  = w;}
     void        setHeight(float h)      {height = h;}
+    void        setScale(float _sx, float _sy)
+    {
+        scalex = _sx;scaley=_sy;
+        // limit the minimum size
+        width 		= width*scalex;
+        height 		= height*scalex;
+        float aspect    = width/(float)height;
+        if(width<0.2)
+        {
+            width   = 0.2;
+            height  = width/aspect;
+        }
+    }
 
     void        setState(float _hit_posx, float _hit_posy, int _button, int _state)
     {

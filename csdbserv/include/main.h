@@ -36,7 +36,8 @@
 #include "cglXNet.h"
 #include <signal.h>
 #include <stdint.h>
-#include "../common/cJSON.h"
+#include "cJSON.h"
+#include "csconnect.h"
 /*! \file main.h
  *
  */
