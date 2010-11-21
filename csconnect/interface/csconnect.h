@@ -14,16 +14,16 @@
  | @END_COPYRIGHT                                                           	 |
  +-------------------------------------------------------------------------------+
  |
- | Component  : csconnect interface
- | Filename   : csconnect.h
+ | Component  : csConnect interface
+ | Filename   : csConnect.h
  | Sourcefile :
  | Language   : C++
  |
  +-------------------------------------------------------------------------------+ */
 
 
-#ifndef INCLUDED_CSCONNECT_H
-#define INCLUDED_CSCONNECT_H
+#ifndef INCLUDED_csConnect_H
+#define INCLUDED_csConnect_H
 
 #ifdef __cplusplus
 
@@ -32,16 +32,16 @@
 #include <stdint.h>
 
 /**
- *  @namespace csconnect
+ *  @namespace csConnect
  *  @brief wraps the functionality need to prototype vr_connect ideas.
  * 
  *  This namespace contains the classes/interfaces/structs used to prototype
  *  a simple version of the vr_connect protocol for a basic web aware image 
  *  viewer.
  */
-namespace csconnect
+namespace csConnect
 {
-    struct oid
+    struct OID
     {
         union 
         {
@@ -52,32 +52,32 @@ namespace csconnect
             };
             uint8_t data[12];
         };
-        oid() : a(0), b(0) {}
+        OID() : a(0), b(0) {}
     };
     
-    inline bool operator==(const oid& l, const oid& r) { return l.a == r.a && l.b == r.b; }
-    inline bool operator!=(const oid& l, const oid& r) { return l.a != r.a || l.b != r.b; }
+    inline bool operator==(const OID& l, const OID& r) { return l.a == r.a && l.b == r.b; }
+    inline bool operator!=(const OID& l, const OID& r) { return l.a != r.a || l.b != r.b; }
     
     /* simple vec3 wrapper */
-    struct vec3
+    struct Vec3
     { 
         float x, y, z;
     };
     
-    struct object_data
+    struct ObjectData
     {
-        object_data() : client_id(-1), user_id(-1) {}
-        oid session_id;
-        oid object_id;
+        ObjectData() : client_id(-1), user_id(-1) {}
+        OID Session_id;
+        OID object_id;
         int client_id;
         int user_id;
         int local_id;
     };
     
     /** data required to describe an image source */
-    struct image_source : object_data
+    struct ImageSource : ObjectData
     {
-        image_source() : width(-1), height(-1) {}
+        ImageSource() : width(-1), height(-1) {}
         
         std::string uri;
         int width;
@@ -85,61 +85,64 @@ namespace csconnect
     };
     
     /** data required to describe an image view */
-    struct image_view : object_data
+    struct ImageView : ObjectData
     {
-        image_view() : source(NULL) {}
-        vec3 position;
-        vec3 scale;
-        image_source *source;
+        ImageView() : source(NULL) {}
+        Vec3 position;
+        Vec3 scale;
+        ImageSource *source;
     };
     
     /**
-     *  @struct session_info
+     *  @struct SessionInfo
      *  
-     *  wraps the information needed to describe a session.
+     *  wraps the information needed to describe a Session.
      */
-    struct session_info
+    struct SessionInfo
     {
-        session_info() {}
+        SessionInfo() {}
         
-        oid session_id;
-        std::vector<image_source> sources;
-        std::vector<image_view> views;
+        OID Session_id;
+        std::vector<ImageSource> sources;
+        std::vector<ImageView> views;
     };
     
     
     /** 
-     *  @class session
+     *  @class Session
      *  @brief prototype interface to the vr_connect interface for images.
      *
      *  @author C. Knox
      *  @date 2010
      */
-    class session
+    class Session
     {
     public:
-        /* connect to or create a session - info struct is filled with the current state of the session */
-        session(session_info& info, const std::string& database_server, const std::string& session_name);
-        ~session() {}
+        /* connect to or create a Session - info struct is filled with the current state of the Session */
+        Session(SessionInfo& info, const std::string& database_server, const std::string& Session_name);
+        ~Session();
         
-        bool get_session_updates(session_info& info);
+        bool getSessionUpdates(SessionInfo& info);
 
-        session_info m_info;
+        SessionInfo m_info;
+    private:
+        struct Impl;
+        Impl *pimpl;
     };
     
-    namespace session_utils
+    namespace Session_utils
     {
-        /** provides a comma separated list of the available sessions. */
-        bool server_sessions(std::string& session_list, const std::string& server_name);
+        /** provides a comma separated list of the available Sessions. */
+        bool serverSessions(std::string& Session_list, const std::string& server_name);
         
         /** create an image */
-        bool create_image_source(image_source& source, session& db_serv);
+        bool createImageSource(ImageSource& source, Session& db_serv);
         /** add image metadata */
-        bool update_image_source(image_source& source, session& db_serv);
+        bool updateImageSource(ImageSource& source, Session& db_serv);
         /** create an image view */
-        bool create_image_view(image_view& view, session& db_serv);
-        /** update an image_view */
-        bool update_image_view(image_view& view, session& db_serv);
+        bool createImageView(ImageView& view, Session& db_serv);
+        /** update an ImageView */
+        bool updateImageView(ImageView& view, Session& db_serv);
     }
 }
 
