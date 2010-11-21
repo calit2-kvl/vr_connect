@@ -23,17 +23,32 @@
 
 #include "csconnect.h"
 #include <stdio.h>
+#include <vector>
+
+using namespace csconnect;
 
 int main(int argc, char **argv)
 {
-	csconnect::oid oid0, oid1;
+	session_info info;
+	session dummy_session = session(info, "foo", "bar");
+
+	if (info.session_id.b)
+	printf("session creation successful\n");
+
+	image_source img_src;
+	img_src.uri = "foo_image.png";
+
+	int local_id = 5;
+	img_src.local_id = local_id;
 	
-	oid1.a = 8589589;
-	oid1.b = 65387;
+	session_utils::create_image_source(img_src, dummy_session);
 
-	oid0 = oid1;
+	dummy_session.get_session_updates(info);
 
-	printf("%i\n", oid0.b);
+	if (info.sources.size() > 0 && info.sources[0].object_id.b)
+		printf("object creation successful\n");
+
+
     return 0;
 }
 
