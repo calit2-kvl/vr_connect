@@ -1,0 +1,7 @@
+.moc
+.obj
+.ui
+Info.plist
+bin
+build
+csgui.xcodeproj
