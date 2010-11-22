@@ -32,6 +32,7 @@
 #include "main.h"
 #include <list>
 #include <string>
+#include <iostream>
 
 // -----------------------------------------------------------------------------+
 // GLOBALS
@@ -125,7 +126,6 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
     std::string message;
     message.assign((const char*)data,size);
     //printf("My Server PID: %d Client Message: %s UID: %d msg-> %s \n",PID ,IP , UID, message.c_str());
-    //printf("Got: %s\n",message.c_str());
 
     // ---------------------------------------
     // We need to define the protocoll to talk
@@ -136,17 +136,12 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
     //
     //  - CREATE:
     //  - UPDATE: (OID,POS,...)
-    //  - ADD
     //  - DELETE:
-    //  - CLONE:
     //  - SAVE:
     //
     //  (Chris and Kai will define the protocol)
     //
     // ---------------------------------------
-    // for now we just send the URL back
-    // ---------------------------------------
-
     cJSON *json_read, *item;
     char *out, *send_out;
     json_read   = cJSON_Parse(message.c_str());
@@ -186,6 +181,7 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
         // we send this only to the creating client
         // to update his object map
         // ----------------------------------------
+        setWaitTime (0);
         sendData((char*) send_out, strlen(send_out), PID);
         free(send_out);
 
@@ -197,13 +193,40 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
         cJSON_AddNumberToObject(json_send,"OID",     uoid);
         cJSON_AddStringToObject(json_send,"TYPE",    "Image");
         cJSON_AddStringToObject(json_send,"URI",     cJSON_GetObjectItem(json_read,"URI")->valuestring);
+        cJSON_AddNumberToObject(json_send,"WIDTH",   cJSON_GetObjectItem(json_read,"WIDTH")->valueint);
+        cJSON_AddNumberToObject(json_send,"HEIGHT",  cJSON_GetObjectItem(json_read,"HEIGHT")->valueint);
+
+        // ------------------------------------
+        // if we have a position
+        // ------------------------------------
+        item        = cJSON_GetObjectItem(json_read,"POS");
+        if(item!=NULL)
+        {
+            float pos[2];
+            pos[0]  = cJSON_GetArrayItem(item, 0)->valuedouble;
+            pos[1]  = cJSON_GetArrayItem(item, 1)->valuedouble;
+            cJSON_AddItemToObject(json_send,"POS", cJSON_CreateFloatArray(pos,2));
+        }
+        // ------------------------------------
+        // if we have a scale
+        // ------------------------------------
+        item        = cJSON_GetObjectItem(json_read,"SCALE");
+        if(item!=NULL)
+        {
+            float scale[2];
+            scale[0]    = cJSON_GetArrayItem(item, 0)->valuedouble;
+            scale[1]    = cJSON_GetArrayItem(item, 1)->valuedouble;
+            cJSON_AddItemToObject(json_send,"SCALE", cJSON_CreateFloatArray(scale,2));
+        }
 
         send_out=cJSON_PrintUnformatted(json_send);
+        //printf(send_out);
+        //fflush(stdout);
         cJSON_Delete(json_send);
 
+        setWaitTime (0);
         sendData((char*) send_out, strlen(send_out), PID, true);
         free(send_out);
-
     }
     else if(strcmp(item->valuestring,"UPDATE")==0)
     {
@@ -211,30 +234,37 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
         //  Send an UPDATE to all other clients
         // ----------------------------------------
         send_out=cJSON_PrintUnformatted(json_read);
+        setWaitTime (0);
         sendData((char*) send_out, strlen(send_out), PID, true);
         free(send_out);
     }
     else if(strcmp(item->valuestring,"DELETE")==0)
     {
-
-    }
-    else if(strcmp(item->valuestring,"CLONE")==0)
-    {
-
+        uint64_t _oid     = cJSON_GetObjectItem(json_read,"OID")->valueint;
+        // ----------------------------------------
+        //  Send an UPDATE to all other clients
+        // ----------------------------------------
+        send_out=cJSON_PrintUnformatted(json_read);
+        setWaitTime (0);
+        sendData((char*) send_out, strlen(send_out), PID, true);
+        free(send_out);
     }
     else if(strcmp(item->valuestring,"SAVE")==0)
     {
-
+        std::string session("SAVE: ");
+        session.append(cJSON_GetObjectItem(json_read,"SESSION")->valuestring);
+        std::cout << session.c_str() << std::endl;
     }
-
-
+    else if(strcmp(item->valuestring,"LOAD")==0)
+    {
+        std::string session("LOAD: ");
+        session.append(cJSON_GetObjectItem(json_read,"SESSION")->valuestring);
+        std::cout << session.c_str() << std::endl;
+    }
     out=cJSON_Print(json_read);
     cJSON_Delete(json_read);
     //printf("%s\n",out);
     free(out);
-
-
-    //sendData((char*)data, size);
 }
 // ------------------------------------------------------------------------------------------
 //   Basic signal handling

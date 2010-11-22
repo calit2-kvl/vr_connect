@@ -119,27 +119,6 @@
       </layout>
      </widget>
     </item>
-    <item row="1" column="0">
-     <widget class="QWebView" name="webView">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>500</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="url">
-       <url>
-        <string>http://www.google.com/imghp</string>
-       </url>
-      </property>
-     </widget>
-    </item>
     <item row="2" column="0">
      <widget class="QPlainTextEdit" name="pte_Url">
       <property name="minimumSize">
@@ -174,6 +153,8 @@
     <addaction name="actionConnect"/>
     <addaction name="actionDisconnect"/>
     <addaction name="separator"/>
+    <addaction name="actionLoad_Image"/>
+    <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
    <addaction name="menuClose"/>
@@ -194,14 +175,12 @@
     <string>Disconnect</string>
    </property>
   </action>
+  <action name="actionLoad_Image">
+   <property name="text">
+    <string>Load Image...</string>
+   </property>
+  </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QWebView</class>
-   <extends>QWidget</extends>
-   <header>QtWebKit/QWebView</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>
