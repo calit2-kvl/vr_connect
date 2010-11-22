@@ -1,7 +1,7 @@
-TARGET = UnitTest++
+TARGET = UnitTest
 LANGUAGE = C++
 TEMPLATE = lib
-DESTDIR = ..
+DESTDIR = ./lib
 CONFIG = staticlib
 
 

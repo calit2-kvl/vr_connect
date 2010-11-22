@@ -1,7 +1,8 @@
+SUBDIRS = UnitTest
 TEMPLATE = app
 SOURCES = test.cpp
-INCLUDEPATH += ../interface
-LIBS += -L../lib -lcsconnect -luuid
+INCLUDEPATH += ../interface UnitTest
+LIBS += -L../lib -L./UnitTest/lib -lUnitTest -lcsconnect 
 QT -= core gui
-CONFIG -= app_bundle x86
-CONFIG += x86_64
+macx:CONFIG -= app_bundle x86
+macx:CONFIG += x86_64

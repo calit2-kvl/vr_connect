@@ -21,34 +21,14 @@
  |
  +-------------------------------------------------------------------------------+ */
 
-#include "csconnect.h"
 #include <stdio.h>
 #include <vector>
 
-using namespace csconnect;
+#include "UnitTest++.h"
+#include "TestReporterStdout.h"
 
-int main(int argc, char **argv)
+
+int main(int, char const *[])
 {
-	session_info info;
-	session dummy_session = session(info, "foo", "bar");
-
-	if (info.session_id.b)
-	printf("session creation successful\n");
-
-	image_source img_src;
-	img_src.uri = "foo_image.png";
-
-	int local_id = 5;
-	img_src.local_id = local_id;
-	
-	session_utils::create_image_source(img_src, dummy_session);
-
-	dummy_session.get_session_updates(info);
-
-	if (info.sources.size() > 0 && info.sources[0].object_id.b)
-		printf("object creation successful\n");
-
-
-    return 0;
+    return UnitTest::RunAllTests();
 }
-
