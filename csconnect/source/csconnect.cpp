@@ -15,30 +15,25 @@
  +-------------------------------------------------------------------------------+
  |
  | Component  : csConnect implementation
- | Filename   : csConnect.cpp
+ | Filename   : csconnect.cpp
  | Sourcefile :
  | Language   : C++
  |
  +-------------------------------------------------------------------------------+ */
 
-#include "csConnect.h"
+#include "csconnect.h"
 
 #include "dbclient.h"
 
-#include <string.h>
+#include <string>
 #include <algorithm>
 #include <vector>
 
-void oid_gen(csConnect::OID& object_id)
-{
-    
-}
-
 namespace csConnect
 {
-    class Session::Impl
+    struct Session::Impl
     {
-        mongo::DBClientConnection *mongoConnection;
+        mongo::DBClientConnection mongoConnection;
         
     };
 }
@@ -48,8 +43,16 @@ csConnect::Session::Session(
                             const std::string& database_server, 
                             const std::string& Session_name)
 {
-    oid_gen(m_info.Session_id);
-    memcpy(info.Session_id.data, m_info.Session_id.data, 12);
+    pimpl = new Impl;
+    std::string errorstr;
+    mongo::HostAndPort host(database_server);
+    bool success = pimpl->mongoConnection.connect(host, errorstr);
+    if (!success)
+    {
+        std::cout << errorstr << "\n";
+    }
+    
+    
 }
 
 csConnect::Session::~Session()
@@ -75,8 +78,6 @@ bool csConnect::Session_utils::createImageSource(
                                                  csConnect::ImageSource& source,
                                                  csConnect::Session& db_serv)
 {
-    oid_gen(source.object_id);
-    db_serv.m_info.sources.push_back(source);
     return true;
 }
 
@@ -84,7 +85,5 @@ bool csConnect::Session_utils::createImageView(
                                                csConnect::ImageView& view,
                                                csConnect::Session& db_serv)
 {
-    oid_gen(view.object_id);
-    db_serv.m_info.views.push_back(view);
     return true;
 }

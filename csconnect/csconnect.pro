@@ -3,13 +3,25 @@ LANGUAGE = C++
 TEMPLATE = lib
 DESTDIR = ./lib
 
+
+macx:MONGOPATH = ../../../dependencies/mongo
+
+
+macx:QMAKE_CXXFLAGS += -fno-visibility-inlines-hidden
+
 INCLUDEPATH += interface
-INCLUDEPATH += ../../../dependencies/mongo/client
+INCLUDEPATH += $$MONGOPATH/client
 
-LIBS += -L/usr/local/lib -lboost_system-mt
+LIBS += -L/usr/local/lib \
+        -L$$MONGOPATH  \
+        -lboost_system-mt \
+        -lboost_thread-mt \
+        -lmongoclient
 
-HEADERS = interface/csconnect.h
-# SOURCES = source/csconnect.cpp
+PRECOMPILED_HEADER = source/csccommon.h
+HEADERS = interface/csconnect.h \
+          source/csccommon.h
+SOURCES = source/csconnect.cpp
 
 
 QT -= core gui
