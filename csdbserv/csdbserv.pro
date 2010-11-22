@@ -30,12 +30,12 @@ MY_ADD_DIR = ../addonlibs
 # The sources
 # ---------------------------------------------------------------------------
 HEADERS = $${MY_INCDIR}/main.h \
-          ../csconnect/interface/csconnect.h \
-          ../common/cJSON.h
+#           ../csconnect/interface/csconnect.h \
+           ../common/cJSON.h
     
 SOURCES = $${MY_SRCDIR}/main.cpp \
-          ../csconnect/source/csconnect.cpp \
-          ../common/cJSON.c
+#           ../csconnect/source/csconnect.cpp \
+           ../common/cJSON.c
     
 
 # ---------------------------------------------------------------------------
