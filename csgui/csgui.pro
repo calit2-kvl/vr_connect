@@ -92,28 +92,28 @@ macx-g++ {
 # This mode is more for better debugging under MAC since we can use XTools
 # ---------------------------------------------------------------------------
 macx-xcode { 
-    ICON = .qrc/icons/cglxmac.icns
+    # ICON = .qrc/icons/cglxmac.icns
     LIBS += -framework \
-        cglX
+        cglXnet
     INCLUDEPATH += $${MY_INCDIR} $${ADD_INCDIR}
 
     QMAKE_LFLAGS +=
     
     # install binary
-    target.path = /Applications
+    # target.path = /Applications
     
     # post innstall -> not nice but it works
-    postinst.path = /Applications
-    postinst.extra = cd \
-        /Applications/$${TARGET}.app/Contents/MacOS;install_name_tool \
-        -change \
-        cglX.framework/Versions/1/cglX \
-        /Library/Frameworks/cglX.framework/Versions/1/cglX \
-        $${TARGET}
-    
+    # postinst.path = /Applications
+    # postinst.extra = cd \
+    #    /Applications/$${TARGET}.app/Contents/MacOS;install_name_tool \
+    #    -change \
+    #    cglX.framework/Versions/1/cglX \
+    #    /Library/Frameworks/cglX.framework/Versions/1/cglX \
+    #    $${TARGET}
+    #
     # "make install" configuration options
-    INSTALLS += target \
-        postinst
+    #INSTALLS += target \
+    #    postinst
     
     # clean it
     CLEAN_FILES += -r \
