@@ -1,4 +1,4 @@
-TARGET = UnitTest
+TARGET = UnitTest++
 LANGUAGE = C++
 TEMPLATE = lib
 DESTDIR = ../lib
