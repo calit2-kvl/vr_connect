@@ -48,10 +48,12 @@ OBJECTS_DIR           = .obj
 # ---------------------------------------------------------------------------
 
 HEADERS              += main.h \
-                        ../common/cJSON.h
+                        ../common/cJSON.h \
+                        all_icons.h
 
 SOURCES              += main.cpp \
                         ../common/cJSON.c
+
 
 # ---------------------------------------------------------------------------
 # linux

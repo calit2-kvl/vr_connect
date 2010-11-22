@@ -34,8 +34,16 @@
 #define CV_CS_GOOGLE_GUI_
 
 #include <QtGui>
-#include "cglXNet.h"
+#include <QWebFrame>
+#ifdef __APPLE__
+        #include <cglXnet/cglXNet.h>
+#else
+        #include "cglXNet.h"
+#endif
+
 #include "ui_csgoogle.h"
+#include <QWebInspector>
+#include "cJSON.h"
 /*! \file main.h
  *
  */
@@ -56,7 +64,7 @@ class csImgGoogle;
  *   Image loader server base class. (cglX).
  *
  *  \author Kai-U. Doerr
- *  \date   2010
+ *  \date   11/01/2010
  *
  */
 class myserver: public cglXServer
@@ -96,7 +104,7 @@ private:
  *   The basic page class for image google.
  *
  *  \author Kai-U. Doerr
- *  \date    2010
+ *  \date   11/01/2010
  *
  */
 class csPage : public QWebPage
@@ -104,12 +112,40 @@ class csPage : public QWebPage
     Q_OBJECT
 public:
     csPage();
-    void triggerAction ( WebAction _action, bool checked = false );
-    WebAction getCurrentAction(void){return current_action;}
+    //void triggerAction ( WebAction _action, bool checked = false );
+    //WebAction getCurrentAction(void){return current_action;}
 protected:
 
 private:
-    WebAction current_action;
+    //WebAction current_action;
+};
+/*! \class csWebView
+ *  \brief Base Web Viewer Class for image google.
+ *
+ *   The basic Web Viewer for image google.
+ *
+ *  \author Kai-U. Doerr
+ *  \date   11/01/2010
+ *
+ */
+class csWebView : public QWebView
+{
+    Q_OBJECT
+public:
+    csWebView(QWidget *parent);
+    void contextMenuEvent(QContextMenuEvent *event);
+    QAction *sendToClientAct;
+
+signals:
+    //! new data arrived
+    void send_image(int _width = 0, int _height = 0, const QUrl & url = QUrl() );
+public slots:
+    void SendToCGLX();
+    void DownloadImg();
+    void OpenImg();
+    void CopyImg();
+private:
+    QPoint hit_pos;
 };
 
 /*! \class csImgGoogle
@@ -140,18 +176,25 @@ public slots:
     void cs_connect();
     void cs_disconnect();
     void on_pb_ConnectDisconnect_pressed();
+    void cs_loadImages();
 
     // browser control
     void on_pb_Home_pressed();
     void on_pb_Back_pressed();
     void on_pb_Forward_pressed();
-    //
-    void ImgDownload(const QNetworkRequest & request);
+
+    // send to CGLX Client
+    void sendImgURIToClient(int _width = 0, int _height = 0, const QUrl & url = QUrl());
 
 protected:
-    csPage      page;
-    myserver    *sm;
-    bool        connected;
+    csPage          page;
+    QWebInspector   *inspector;
+    csWebView       *myWebView;
+    myserver        *sm;
+    bool            connected;
+
+private slots:
+
 };
 
 #endif

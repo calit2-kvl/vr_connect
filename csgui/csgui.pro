@@ -23,6 +23,7 @@ QT += opengl webkit network
 # ---------------------------------------------------------------------------
 DESTDIR = ./bin
 MY_INCDIR = ./include
+ADD_INCDIR            = ../common
 MY_SRCDIR = ./src
 UI_DIR = .ui
 RCC_DIR = .qrc
@@ -33,9 +34,11 @@ MY_ADD_DIR = ../addonlibs
 # ---------------------------------------------------------------------------
 # The sources
 # ---------------------------------------------------------------------------
-HEADERS = $${MY_INCDIR}/main.h
+HEADERS = $${MY_INCDIR}/main.h \
+            ../common/cJSON.h
     
-SOURCES = $${MY_SRCDIR}/main.cpp
+SOURCES = $${MY_SRCDIR}/main.cpp \
+            ../common/cJSON.c
     
 
 FORMS = $${UI_DIR}/csgoogle.ui
@@ -49,7 +52,7 @@ FORMS = $${UI_DIR}/csgoogle.ui
 # ---------------------------------------------------------------------------
 linux-g++ { 
     LIBS += -L /usr/local/cglX/lib -lcglXnet
-    INCLUDEPATH += $${MY_INCDIR} /usr/local/cglX/include
+    INCLUDEPATH += $${MY_INCDIR} $${ADD_INCDIR} /usr/local/cglX/include
     
     # clean it
     CLEAN_FILES += $$DESTDIR/$${TARGET}
@@ -61,7 +64,7 @@ linux-g++ {
 # ---------------------------------------------------------------------------
 linux-g++-64 { 
     LIBS += -L /usr/local/cglX/lib -lcglXnet
-    INCLUDEPATH += $${MY_INCDIR} /usr/local/cglX/include
+    INCLUDEPATH += $${MY_INCDIR} $${ADD_INCDIR} /usr/local/cglX/include
     
     # clean it
     CLEAN_FILES += $$DESTDIR/$${TARGET}
@@ -74,8 +77,8 @@ linux-g++-64 {
 macx-g++ { 
     
     LIBS += -framework cglXnet
-    INCLUDEPATH += $${MY_INCDIR} 
-    QMAKE_LFLAGS += -F../cglXlib/lib/
+    INCLUDEPATH += $${MY_INCDIR} $${ADD_INCDIR}
+    QMAKE_LFLAGS +=
     
     # clean it
     CLEAN_FILES += -r $$DESTDIR/$${TARGET}.app
@@ -92,11 +95,9 @@ macx-xcode {
     ICON = .qrc/icons/cglxmac.icns
     LIBS += -framework \
         cglX
-    INCLUDEPATH += $${MY_INCDIR} \
-        ../cglXlib/include \
-        ../addonlibs/ \
-        /usr/local/include/qwt
-    QMAKE_LFLAGS += -F../cglXlib/lib/
+    INCLUDEPATH += $${MY_INCDIR} $${ADD_INCDIR}
+
+    QMAKE_LFLAGS +=
     
     # install binary
     target.path = /Applications
@@ -127,4 +128,4 @@ CLEAN_FILES += $${MY_INCDIR}/*~ \
     $${OBJECTS_DIR}/* \
     $${MOC_DIR}/* \
     ./Makefile
-OTHER_FILES += ../etc/style/cglx.qss
+
