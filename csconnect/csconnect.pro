@@ -9,7 +9,7 @@ INCLUDEPATH += ../../../dependencies/mongo/client
 LIBS += -L/usr/local/lib -lboost_system-mt
 
 HEADERS = interface/csconnect.h
-SOURCES = source/csconnect.cpp
+# SOURCES = source/csconnect.cpp
 
 
 QT -= core gui
