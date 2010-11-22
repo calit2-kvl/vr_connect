@@ -15,15 +15,15 @@
  +-------------------------------------------------------------------------------+
  |
  | Component  : csConnect interface
- | Filename   : csConnect.h
+ | Filename   : csconnect.h
  | Sourcefile :
  | Language   : C++
  |
  +-------------------------------------------------------------------------------+ */
 
 
-#ifndef INCLUDED_csConnect_H
-#define INCLUDED_csConnect_H
+#ifndef INCLUDED_CSCONNECT_H
+#define INCLUDED_CSCONNECT_H
 
 #ifdef __cplusplus
 
