@@ -22,6 +22,7 @@
  +-------------------------------------------------------------------------------+ */
 
 #include <string>
+#include <iostream>
 
 #include "UnitTest++.h"
 #include "TestReporterStdout.h"

@@ -103,8 +103,8 @@ namespace csConnect
         SessionInfo() {}
         
         OID Session_id;
-        std::vector<ImageSource> sources;
-        std::vector<ImageView> views;
+        std::string sources;
+        std::string views;
     };
     
     
@@ -121,12 +121,11 @@ namespace csConnect
         Session();
         ~Session();
         
-        /* connect to or create a Session - info struct is filled with the current state of the Session */
+        /* connect to or create a session - info struct is filled with the current state of the session */
         bool connect(SessionInfo& info, const std::string& database_server, const std::string& session_name);
         
         bool getSessionUpdates(SessionInfo& info);
 
-        SessionInfo m_info;
     private:
         struct Impl;
         Impl *pimpl;
