@@ -21,12 +21,22 @@
  |
  +-------------------------------------------------------------------------------+ */
 
-#include <stdio.h>
-#include <vector>
+#include <string>
 
 #include "UnitTest++.h"
 #include "TestReporterStdout.h"
 
+
+#include "csconnect.h"
+
+TEST(Sesssion_connect)
+{
+    csConnect::SessionInfo session_info;
+    std::string servername = "127.0.0.1";
+    std::string sessionname = "test_session";
+    csConnect::Session session;
+    CHECK(session.connect(session_info, servername, sessionname));
+}
 
 int main(int, char const *[])
 {

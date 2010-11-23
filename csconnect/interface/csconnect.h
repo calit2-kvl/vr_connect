@@ -118,9 +118,11 @@ namespace csConnect
     class Session
     {
     public:
-        /* connect to or create a Session - info struct is filled with the current state of the Session */
-        Session(SessionInfo& info, const std::string& database_server, const std::string& Session_name);
+        Session();
         ~Session();
+        
+        /* connect to or create a Session - info struct is filled with the current state of the Session */
+        bool connect(SessionInfo& info, const std::string& database_server, const std::string& session_name);
         
         bool getSessionUpdates(SessionInfo& info);
 
@@ -130,10 +132,10 @@ namespace csConnect
         Impl *pimpl;
     };
     
-    namespace Session_utils
+    namespace SessionUtils
     {
         /** provides a comma separated list of the available Sessions. */
-        bool serverSessions(std::string& Session_list, const std::string& server_name);
+        bool serverSessions(std::string& session_list, const std::string& server_name);
         
         /** create an image */
         bool createImageSource(ImageSource& source, Session& db_serv);
