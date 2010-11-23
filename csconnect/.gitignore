@@ -3,3 +3,4 @@ build
 csconnect.o
 csconnect.xcodeproj
 lib
+csconnect.xcworkspace

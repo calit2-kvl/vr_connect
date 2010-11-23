@@ -49,7 +49,7 @@ csConnect::Session::Session(
     bool success = pimpl->mongoConnection.connect(host, errorstr);
     if (!success)
     {
-        std::error << errorstr << "\n";
+        std::cout << errorstr << "\n";
     }
     
     
