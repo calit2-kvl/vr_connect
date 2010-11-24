@@ -19,11 +19,8 @@ LIBS += -L/usr/local/lib \
         -lmongoclient
 
 
-PRECOMPILED_HEADER = csccommon.h
+HEADERS = ../interface/csconnect.h
 
-HEADERS = ../interface/csconnect.h \
-          csccommon.h
-          
 SOURCES = csconnect.cpp
 
 

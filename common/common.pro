@@ -1,0 +1,7 @@
+TARGET = common
+LANGUAGE = C
+TEMPLATE = lib
+CONFIG = staticlib
+
+SOURCES = cJSON.c
+HEADERS = cJSON.h

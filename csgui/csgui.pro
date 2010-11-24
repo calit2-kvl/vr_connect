@@ -34,15 +34,13 @@ MY_ADD_DIR = ../addonlibs
 # ---------------------------------------------------------------------------
 # The sources
 # ---------------------------------------------------------------------------
-HEADERS = $${MY_INCDIR}/main.h \
-            ../common/cJSON.h
-    
-SOURCES = $${MY_SRCDIR}/main.cpp \
-            ../common/cJSON.c
-    
+HEADERS = $${MY_INCDIR}/main.h
 
+SOURCES = $${MY_SRCDIR}/main.cpp
+
+LIBS += -L../common -lcommon
 FORMS = $${UI_DIR}/csgoogle.ui
-    
+
 
 #RESOURCES = $${RCC_DIR}/csgoogle.qrc
 
@@ -50,10 +48,10 @@ FORMS = $${UI_DIR}/csgoogle.ui
 # linux
 # -g++ 32bit
 # ---------------------------------------------------------------------------
-linux-g++ { 
+linux-g++ {
     LIBS += -L /usr/local/cglX/lib -lcglXnet
     INCLUDEPATH += $${MY_INCDIR} $${ADD_INCDIR} /usr/local/cglX/include
-    
+
     # clean it
     CLEAN_FILES += $$DESTDIR/$${TARGET}
 }
@@ -62,10 +60,10 @@ linux-g++ {
 # linux
 # -g++ 64bit
 # ---------------------------------------------------------------------------
-linux-g++-64 { 
+linux-g++-64 {
     LIBS += -L /usr/local/cglX/lib -lcglXnet
     INCLUDEPATH += $${MY_INCDIR} $${ADD_INCDIR} /usr/local/cglX/include
-    
+
     # clean it
     CLEAN_FILES += $$DESTDIR/$${TARGET}
 }
@@ -74,12 +72,12 @@ linux-g++-64 {
 # MAC OS Native AGL
 # -g++
 # ---------------------------------------------------------------------------
-macx-g++ { 
-    
+macx-g++ {
+
     LIBS += -framework cglXnet
     INCLUDEPATH += $${MY_INCDIR} $${ADD_INCDIR}
     QMAKE_LFLAGS +=
-    
+
     # clean it
     CLEAN_FILES += -r $$DESTDIR/$${TARGET}.app
 }
@@ -91,17 +89,17 @@ macx-g++ {
 # The installation does not really work ->> need to fix that !!
 # This mode is more for better debugging under MAC since we can use XTools
 # ---------------------------------------------------------------------------
-macx-xcode { 
+macx-xcode {
     # ICON = .qrc/icons/cglxmac.icns
     LIBS += -framework \
         cglXnet
     INCLUDEPATH += $${MY_INCDIR} $${ADD_INCDIR}
 
     QMAKE_LFLAGS +=
-    
+
     # install binary
     # target.path = /Applications
-    
+
     # post innstall -> not nice but it works
     # postinst.path = /Applications
     # postinst.extra = cd \
@@ -114,7 +112,7 @@ macx-xcode {
     # "make install" configuration options
     #INSTALLS += target \
     #    postinst
-    
+
     # clean it
     CLEAN_FILES += -r \
         ./build
