@@ -347,7 +347,7 @@ bool checkWidgetHit(vec2f_P vec=NULL, int UserID=-1, int button=0, int state=-1,
                             cJSON *json_send;
                             json_send=cJSON_CreateObject();
                             cJSON_AddStringToObject(json_send,"CMD",     "DELETE");
-                            cJSON_AddNumberToObject(json_send,"_id",     window->getOID());
+                            cJSON_AddNumberToObject(json_send,"OID",     window->getOID());
                             send_out=cJSON_PrintUnformatted(json_send);
                             cJSON_Delete(json_send);
 
@@ -822,10 +822,10 @@ void customMSGfunc(int len, unsigned char *msg)
             if(strcmp(item->valuestring,        "UPDATE"    )==0)
             {
                 item    = cJSON_GetObjectItem(json_read,"ATTR");
-                if(strcmp(item->valuestring,"_id")==0)              // update object ID
+                if(strcmp(item->valuestring,"OID")==0)              // update object ID
                 {
                     int   _cid      = cJSON_GetObjectItem(json_read,"CID")->valueint;
-                    _oid            = cJSON_GetObjectItem(json_read,"_id")->valueint;
+                    _oid            = cJSON_GetObjectItem(json_read,"OID")->valueint;
 
                     csWindow::om_iter iter = m_DBObjectMap.find(_cid);
                     if(iter!=m_DBObjectMap.end())
@@ -840,7 +840,7 @@ void customMSGfunc(int len, unsigned char *msg)
                 }
                 else if(strcmp(item->valuestring,"POS")==0)         // update object position
                 {
-                    _oid            = cJSON_GetObjectItem(json_read,"_id")->valueint;
+                    _oid            = cJSON_GetObjectItem(json_read,"OID")->valueint;
 
                     csWindow::om_iter iter = m_DBObjectMap.find(_oid);
                     if(iter!=m_DBObjectMap.end())
@@ -860,7 +860,7 @@ void customMSGfunc(int len, unsigned char *msg)
                 }
                 else if(strcmp(item->valuestring,"SCALE")==0)     // update object scale
                 {
-                    _oid            = cJSON_GetObjectItem(json_read,"_id")->valueint;
+                    _oid            = cJSON_GetObjectItem(json_read,"OID")->valueint;
 
                     //window      = m_DBObjectMap[_oid];        // if we know the object is in map !!
 
@@ -911,7 +911,7 @@ void customMSGfunc(int len, unsigned char *msg)
                     // create new object
                     // ------------------------------------
                     window  = new csWindow();
-                    window->setOID(cJSON_GetObjectItem(json_read,"_id")->valueint);
+                    window->setOID(cJSON_GetObjectItem(json_read,"OID")->valueint);
                     window->setURI(cJSON_GetObjectItem(json_read,"URI")->valuestring);
                     window->session_obj  = true;     // object is already in database
                     window->setImageDim(cJSON_GetObjectItem(json_read,"WIDTH")->valueint, cJSON_GetObjectItem(json_read,"HEIGHT")->valueint);
@@ -950,7 +950,7 @@ void customMSGfunc(int len, unsigned char *msg)
             {
                 //jsonToConsol(json_read);
 
-                uint64_t _oid     = cJSON_GetObjectItem(json_read,"_id")->valueint;
+                uint64_t _oid     = cJSON_GetObjectItem(json_read,"OID")->valueint;
 
                 // erase from object map and list
                 int uid=removeObject(_oid);
@@ -999,7 +999,7 @@ void customMSGfunc(int len, unsigned char *msg)
                     // create new object
                     // ------------------------------------
                     csWindow    *newWindow  = new csWindow();
-                    uint64_t    _oid    = cJSON_GetObjectItem(json_read,"_id")->valueint;
+                    uint64_t    _oid    = cJSON_GetObjectItem(json_read,"OID")->valueint;
                     newWindow->setURI(cJSON_GetObjectItem(json_read,"URI")->valuestring);
                     if(_oid!=-1)
                     {
@@ -1217,7 +1217,7 @@ void motionfunc(int x,int y)
                     cJSON *json_send=NULL;
                     json_send=cJSON_CreateObject();
                     cJSON_AddStringToObject(json_send,"CMD",     "UPDATE");
-                    cJSON_AddNumberToObject(json_send,"_id",     window->getOID());
+                    cJSON_AddNumberToObject(json_send,"OID",     window->getOID());
 
                     if(button==CGLX_LEFT_BUTTON)
                     {

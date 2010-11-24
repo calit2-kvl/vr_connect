@@ -30,14 +30,13 @@
 
 #include "csconnect.h"
 
+using namespace csConnect;
+
 TEST(Sesssion_connect)
 {
-    csConnect::SessionInfo session_info;
-    std::string servername = "127.0.0.1";
-    std::string sessionname = "tutorial";
-    csConnect::Session session;
-    CHECK(session.connect(session_info, servername, sessionname));
-    std::cout << session_info.sources << "\n";
+    Session session;
+    std::string servername = "109.171.139.4";
+    CHECK(session.connect(servername));
 }
 
 int main(int, char const *[])

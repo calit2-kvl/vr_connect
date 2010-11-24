@@ -1,24 +1,4 @@
 /*
-+-------------------------------------------------------------------------------+
-| @BEGIN_COPYRIGHT                                                             	|
-|                                                                               |
-| Copyright (C) 2010-2015, The Regents of the University of California &       	|
-| King Abdula University of Science and Technology                              |
-| All Rights Reserved.                                                          |
-|                                                                               |
-|                                                                               |
-| Prototyped and developed By:                                                  |
-|    Kai-Uwe Doerr       {kdoerr@usd.edu}                                       |
-|    Christopher Knox  	 {christopher.knox@kaust.edu.sa}                        |
-|                                                                               |
-| @END_COPYRIGHT                                                                |
-+-------------------------------------------------------------------------------+
-|                                               
-| Component  : 
-| Filename   : 
-| Sourcefile : 
-| Language   : C++
-|                                               
 +----------------------------- Revision Information-----------------------------+
 | $Author: kdoerr $
 | $Revision: 1.0.0.0 $
@@ -37,7 +17,6 @@
 #include <signal.h>
 #include <stdint.h>
 #include "cJSON.h"
-#include "csconnect.h"
 /*! \file main.h
  *
  */

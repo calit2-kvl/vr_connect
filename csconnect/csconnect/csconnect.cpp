@@ -43,12 +43,6 @@ csConnect::Session::Session()
     pimpl = new Impl;
 }
 
-//namespace SessionUtils
-//{
-//    bool
-//
-//}
-
 void collectionAsJson(std::string& output,
                       mongo::DBClientConnection& conn,
                       const std::string& database,
@@ -75,9 +69,7 @@ void collectionAsJson(std::string& output,
     output.append("}");
 }
 
-bool csConnect::Session::connect(csConnect::SessionInfo &info,
-                                 std::string const &database_server,
-                                 std::string const &session_name)
+bool csConnect::Session::connect(std::string const &database_server)
 {
     std::string errorstr;
     mongo::HostAndPort host(database_server);
@@ -86,11 +78,6 @@ bool csConnect::Session::connect(csConnect::SessionInfo &info,
     {
         if (!pimpl->mongoConnection.connect(host, errorstr))
             return false;
-
-        collectionAsJson(info.sources, pimpl->mongoConnection, session_name, "persons");
-
-        collectionAsJson(info.views, pimpl->mongoConnection, session_name, "views");
-
     }
     catch (mongo::DBException &e)
     /* not sure from mongo docs as to whether I need to catch exceptions
@@ -104,18 +91,4 @@ bool csConnect::Session::connect(csConnect::SessionInfo &info,
 csConnect::Session::~Session()
 {
     delete pimpl;
-}
-
-bool csConnect::SessionUtils::createImageSource(
-                                                 csConnect::ImageSource& source,
-                                                 csConnect::Session& db_serv)
-{
-    return true;
-}
-
-bool csConnect::SessionUtils::createImageView(
-                                               csConnect::ImageView& view,
-                                               csConnect::Session& db_serv)
-{
-    return true;
 }

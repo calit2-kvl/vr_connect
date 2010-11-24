@@ -284,12 +284,10 @@ void csImgGoogle::sendImgURIToClient(int _width, int _height, const QUrl & url )
     json_send=cJSON_CreateObject();
     cJSON_AddStringToObject(json_send,"CMD",     "CREATE");
     cJSON_AddStringToObject(json_send,"TYPE",    "Image");
-    cJSON_AddNumberToObject(json_send,"_id",    -1);
     cJSON_AddStringToObject(json_send,"URI",     url.toString().toStdString().c_str());
     cJSON_AddNumberToObject(json_send,"WIDTH",   _width);
     cJSON_AddNumberToObject(json_send,"HEIGHT",  _height);
 
-    cJSON_DeleteItemFromObject(json_send, "_id");
 
     float pos[2];
     pos[0]  = 0.0f;

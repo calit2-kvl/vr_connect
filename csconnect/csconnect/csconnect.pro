@@ -2,24 +2,20 @@ TARGET = csconnect
 LANGUAGE = C++
 TEMPLATE = lib
 DESTDIR = ../lib
-
+CONFIG = staticlib
 
 macx:MONGOPATH = ../../../../dependencies/mongo
 
 
 macx:QMAKE_CXXFLAGS += -fno-visibility-inlines-hidden
 
-INCLUDEPATH += ../interface
+INCLUDEPATH += interface
+INCLUDEPATH += ../../common
 macx:INCLUDEPATH += $$MONGOPATH/client
 
 macx:LIBS += -L$$MONGOPATH
 
-LIBS += -L/usr/local/lib \
-        -lboost_thread \
-        -lmongoclient
-
-
-HEADERS = ../interface/csconnect.h
+HEADERS = interface/csconnect.h
 
 SOURCES = csconnect.cpp
 

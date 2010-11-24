@@ -5,3 +5,4 @@
 KAUST-CODE.pro.user
 Makefile
 bin
+*.a
