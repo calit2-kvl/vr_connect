@@ -10,13 +10,14 @@ macx:MONGOPATH = ../../../../dependencies/mongo
 macx:QMAKE_CXXFLAGS += -fno-visibility-inlines-hidden
 
 INCLUDEPATH += ../interface
-INCLUDEPATH += $$MONGOPATH/client
+macx:INCLUDEPATH += $$MONGOPATH/client
+
+macx:LIBS += -L$$MONGOPATH
 
 LIBS += -L/usr/local/lib \
-        -L$$MONGOPATH  \
-        -lboost_system-mt \
-        -lboost_thread-mt \
+        -lboost_thread \
         -lmongoclient
+
 
 PRECOMPILED_HEADER = csccommon.h
 

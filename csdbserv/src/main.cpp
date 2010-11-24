@@ -170,9 +170,9 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
         cJSON *json_send=NULL;
         json_send=cJSON_CreateObject();
         cJSON_AddStringToObject(json_send,"CMD",     "UPDATE");
-        cJSON_AddStringToObject(json_send,"ATTR",    "OID");
+        cJSON_AddStringToObject(json_send,"ATTR",    "_id");
         cJSON_AddNumberToObject(json_send,"CID",     _cid);
-        cJSON_AddNumberToObject(json_send,"OID",     uoid);
+        cJSON_AddNumberToObject(json_send,"_id",     uoid);
         send_out=cJSON_PrintUnformatted(json_send);
         cJSON_Delete(json_send);
         json_send=NULL;
@@ -190,7 +190,7 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
         // ----------------------------------------
         json_send=cJSON_CreateObject();
         cJSON_AddStringToObject(json_send,"CMD",     "CREATE");
-        cJSON_AddNumberToObject(json_send,"OID",     uoid);
+        cJSON_AddNumberToObject(json_send,"_id",     uoid);
         cJSON_AddStringToObject(json_send,"TYPE",    "Image");
         cJSON_AddStringToObject(json_send,"URI",     cJSON_GetObjectItem(json_read,"URI")->valuestring);
         cJSON_AddNumberToObject(json_send,"WIDTH",   cJSON_GetObjectItem(json_read,"WIDTH")->valueint);
@@ -240,7 +240,7 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
     }
     else if(strcmp(item->valuestring,"DELETE")==0)
     {
-        uint64_t _oid     = cJSON_GetObjectItem(json_read,"OID")->valueint;
+        uint64_t _oid     = cJSON_GetObjectItem(json_read,"_id")->valueint;
         // ----------------------------------------
         //  Send an UPDATE to all other clients
         // ----------------------------------------

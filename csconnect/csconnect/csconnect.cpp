@@ -23,7 +23,7 @@
 
 #include "csconnect.h"
 
-#include "dbclient.h"
+#include <mongo/client/dbclient.h>
 
 #include <string>
 #include <algorithm>
@@ -34,7 +34,7 @@ namespace csConnect
     struct Session::Impl
     {
         mongo::DBClientConnection mongoConnection;
-        
+
     };
 }
 
@@ -45,26 +45,26 @@ csConnect::Session::Session()
 
 //namespace SessionUtils
 //{
-//    bool 
-//    
+//    bool
+//
 //}
 
-void collectionAsJson(std::string& output, 
+void collectionAsJson(std::string& output,
                       mongo::DBClientConnection& conn,
                       const std::string& database,
                       const std::string& collection)
 {
     std::string path(database);
     path.append("." + collection);
-    
+
     auto_ptr<mongo::DBClientCursor> cursor = conn.query(path, mongo::BSONObj());
-    
+
     output = "{ \"" + collection + "\" : ";
     if (!cursor->more())
         output.append("null");
     else
         output.append("[");
-    while(cursor->more()) 
+    while(cursor->more())
     {
         output.append(cursor->next().jsonString());
         if (cursor->more())
@@ -75,24 +75,24 @@ void collectionAsJson(std::string& output,
     output.append("}");
 }
 
-bool csConnect::Session::connect(csConnect::SessionInfo &info, 
-                                 std::string const &database_server,  
+bool csConnect::Session::connect(csConnect::SessionInfo &info,
+                                 std::string const &database_server,
                                  std::string const &session_name)
 {
-    std::string errorstr;    
+    std::string errorstr;
     mongo::HostAndPort host(database_server);
 
     try
     {
         if (!pimpl->mongoConnection.connect(host, errorstr))
             return false;
-        
+
         collectionAsJson(info.sources, pimpl->mongoConnection, session_name, "persons");
 
         collectionAsJson(info.views, pimpl->mongoConnection, session_name, "views");
 
     }
-    catch (mongo::DBException &e) 
+    catch (mongo::DBException &e)
     /* not sure from mongo docs as to whether I need to catch exceptions
      * and check for false returns from the functions or not. */
     {

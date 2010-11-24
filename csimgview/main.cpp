@@ -347,7 +347,7 @@ bool checkWidgetHit(vec2f_P vec=NULL, int UserID=-1, int button=0, int state=-1,
                             cJSON *json_send;
                             json_send=cJSON_CreateObject();
                             cJSON_AddStringToObject(json_send,"CMD",     "DELETE");
-                            cJSON_AddNumberToObject(json_send,"OID",     window->getOID());
+                            cJSON_AddNumberToObject(json_send,"_id",     window->getOID());
                             send_out=cJSON_PrintUnformatted(json_send);
                             cJSON_Delete(json_send);
 
@@ -688,16 +688,16 @@ void displayfunc(void)
     glPopAttrib();
 }
 void init(void)
-{ 
+{
     glClearColor (0.0, 0.0, 0.0, 0.0);
-    glShadeModel(GL_SMOOTH); 							// The Default coloring style 
+    glShadeModel(GL_SMOOTH); 							// The Default coloring style
     //glEnable(GL_DEPTH_TEST);
     GLint params;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &params);
     printf("Texture size limit : %d bytes \n",params);
 }
 void reshapefunc(int w, int h)
-{  
+{
     glViewport (0, 0, (GLsizei) w, (GLsizei) h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -822,10 +822,10 @@ void customMSGfunc(int len, unsigned char *msg)
             if(strcmp(item->valuestring,        "UPDATE"    )==0)
             {
                 item    = cJSON_GetObjectItem(json_read,"ATTR");
-                if(strcmp(item->valuestring,"OID")==0)              // update object ID
+                if(strcmp(item->valuestring,"_id")==0)              // update object ID
                 {
                     int   _cid      = cJSON_GetObjectItem(json_read,"CID")->valueint;
-                    _oid            = cJSON_GetObjectItem(json_read,"OID")->valueint;
+                    _oid            = cJSON_GetObjectItem(json_read,"_id")->valueint;
 
                     csWindow::om_iter iter = m_DBObjectMap.find(_cid);
                     if(iter!=m_DBObjectMap.end())
@@ -840,7 +840,7 @@ void customMSGfunc(int len, unsigned char *msg)
                 }
                 else if(strcmp(item->valuestring,"POS")==0)         // update object position
                 {
-                    _oid            = cJSON_GetObjectItem(json_read,"OID")->valueint;
+                    _oid            = cJSON_GetObjectItem(json_read,"_id")->valueint;
 
                     csWindow::om_iter iter = m_DBObjectMap.find(_oid);
                     if(iter!=m_DBObjectMap.end())
@@ -860,13 +860,13 @@ void customMSGfunc(int len, unsigned char *msg)
                 }
                 else if(strcmp(item->valuestring,"SCALE")==0)     // update object scale
                 {
-                    _oid            = cJSON_GetObjectItem(json_read,"OID")->valueint;
+                    _oid            = cJSON_GetObjectItem(json_read,"_id")->valueint;
 
                     //window      = m_DBObjectMap[_oid];        // if we know the object is in map !!
 
                     csWindow::om_iter iter = m_DBObjectMap.find(_oid);
                     if(iter!=m_DBObjectMap.end())
-                    { 
+                    {
                         window      = iter->second;
                         item        = cJSON_GetObjectItem(json_read,"SCALE");
                         int	  num   = cJSON_GetArraySize(item);
@@ -911,7 +911,7 @@ void customMSGfunc(int len, unsigned char *msg)
                     // create new object
                     // ------------------------------------
                     window  = new csWindow();
-                    window->setOID(cJSON_GetObjectItem(json_read,"OID")->valueint);
+                    window->setOID(cJSON_GetObjectItem(json_read,"_id")->valueint);
                     window->setURI(cJSON_GetObjectItem(json_read,"URI")->valuestring);
                     window->session_obj  = true;     // object is already in database
                     window->setImageDim(cJSON_GetObjectItem(json_read,"WIDTH")->valueint, cJSON_GetObjectItem(json_read,"HEIGHT")->valueint);
@@ -950,7 +950,7 @@ void customMSGfunc(int len, unsigned char *msg)
             {
                 //jsonToConsol(json_read);
 
-                uint64_t _oid     = cJSON_GetObjectItem(json_read,"OID")->valueint;
+                uint64_t _oid     = cJSON_GetObjectItem(json_read,"_id")->valueint;
 
                 // erase from object map and list
                 int uid=removeObject(_oid);
@@ -999,7 +999,7 @@ void customMSGfunc(int len, unsigned char *msg)
                     // create new object
                     // ------------------------------------
                     csWindow    *newWindow  = new csWindow();
-                    uint64_t    _oid    = cJSON_GetObjectItem(json_read,"OID")->valueint;
+                    uint64_t    _oid    = cJSON_GetObjectItem(json_read,"_id")->valueint;
                     newWindow->setURI(cJSON_GetObjectItem(json_read,"URI")->valuestring);
                     if(_oid!=-1)
                     {
@@ -1217,7 +1217,7 @@ void motionfunc(int x,int y)
                     cJSON *json_send=NULL;
                     json_send=cJSON_CreateObject();
                     cJSON_AddStringToObject(json_send,"CMD",     "UPDATE");
-                    cJSON_AddNumberToObject(json_send,"OID",     window->getOID());
+                    cJSON_AddNumberToObject(json_send,"_id",     window->getOID());
 
                     if(button==CGLX_LEFT_BUTTON)
                     {
@@ -1356,7 +1356,7 @@ void loc_triggfunc(int ID, int code)
     cglXPostRedisplay();
 }
 int main(int argc, char** argv)
-{  
+{
     // ----------------------------------
     // Initialize CGLX
     // ----------------------------------
@@ -1466,4 +1466,4 @@ int main(int argc, char** argv)
     pthread_mutex_destroy(&obj_list_mutex);
 
     return 0;   								// ANSI C requires main to return int.
-}  
+}
