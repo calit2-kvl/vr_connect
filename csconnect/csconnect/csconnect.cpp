@@ -51,20 +51,35 @@ csConnect::Session::Session()
 
 void collectionAsJson(std::string& output, 
                       mongo::DBClientConnection& conn,
+                      const std::string& database,
                       const std::string& collection)
 {
-    auto_ptr<mongo::DBClientCursor> cursor = conn.query(collection, mongo::BSONObj());
+    std::string path(database);
+    path.append("." + collection);
+    
+    auto_ptr<mongo::DBClientCursor> cursor = conn.query(path, mongo::BSONObj());
+    
+    output = "{ \"" + collection + "\" : ";
+    if (!cursor->more())
+        output.append("null");
+    else
+        output.append("[");
     while(cursor->more()) 
+    {
         output.append(cursor->next().jsonString());
+        if (cursor->more())
+            output.append(",");
+        else
+            output.append("]");
+    }
+    output.append("}");
 }
 
 bool csConnect::Session::connect(csConnect::SessionInfo &info, 
                                  std::string const &database_server,  
                                  std::string const &session_name)
 {
-    std::string errorstr;
-    std::string collection;
-    
+    std::string errorstr;    
     mongo::HostAndPort host(database_server);
 
     try
@@ -72,11 +87,9 @@ bool csConnect::Session::connect(csConnect::SessionInfo &info,
         if (!pimpl->mongoConnection.connect(host, errorstr))
             return false;
         
-        collection = session_name + ".sources";
-        collectionAsJson(info.sources, pimpl->mongoConnection, collection);
+        collectionAsJson(info.sources, pimpl->mongoConnection, session_name, "persons");
 
-        collection = session_name + ".views";
-        collectionAsJson(info.views, pimpl->mongoConnection, collection);
+        collectionAsJson(info.views, pimpl->mongoConnection, session_name, "views");
 
     }
     catch (mongo::DBException &e) 

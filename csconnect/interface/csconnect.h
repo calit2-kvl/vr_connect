@@ -38,6 +38,10 @@
  *  This namespace contains the classes/interfaces/structs used to prototype
  *  a simple version of the vr_connect protocol for a basic web aware image 
  *  viewer.
+ *
+ *  In this version all communication is carried out by passing around
+ *  strings which contain json documents. In a future version I hope
+ *  to replace this with bson documents
  */
 namespace csConnect
 {
@@ -146,8 +150,6 @@ namespace csConnect
         bool updateImageView(ImageView& view, Session& db_serv);
     }
 }
-
-
 
 
 #endif /* __cplusplus */
