@@ -24,23 +24,15 @@
 #include "csconnect.h"
 
 #include <mongo/client/dbclient.h>
+#include "cJSON.h"
 
 #include <string>
 #include <algorithm>
 #include <vector>
 
-namespace csConnect
-{
-    struct Session::Impl
-    {
-        mongo::DBClientConnection mongoConnection;
-
-    };
-}
-
 csConnect::Session::Session()
 {
-    pimpl = new Impl;
+    db = new mongo::DBClientConnection;
 }
 
 void collectionAsJson(std::string& output,
@@ -76,7 +68,7 @@ bool csConnect::Session::connect(std::string const &database_server)
 
     try
     {
-        if (!pimpl->mongoConnection.connect(host, errorstr))
+        if (!db->connect(host, errorstr))
             return false;
     }
     catch (mongo::DBException &e)
@@ -90,5 +82,22 @@ bool csConnect::Session::connect(std::string const &database_server)
 
 csConnect::Session::~Session()
 {
-    delete pimpl;
+    delete db;
+}
+
+bool csConnect::Session::create(cJSON *id_object, cJSON *create_obj)
+{
+    try
+    {
+        mongo::BSONObj create_b = mongo::BSONObj(cJSON_PrintUnformatted(create_obj));
+        db->insert("devel_test", create_b);
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+    
+    
+    return false;
 }

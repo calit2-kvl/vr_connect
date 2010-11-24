@@ -30,7 +30,6 @@
 #include <string>
 #include <vector>
 #include <stdint.h>
-#include "cJSON.h"
 
 /**
  *  @namespace csConnect
@@ -44,6 +43,10 @@
  *  strings which contain json documents. In a future version I hope
  *  to replace this with bson documents
  */
+
+/* forward declarations */
+struct cJSON;
+namespace mongo {class DBClientConnection;}
 namespace csConnect
 {
     class Session
@@ -57,15 +60,14 @@ namespace csConnect
         /** return a comma separated list of available sessions. */
         bool getSessionNames(std::string& sessions);
 
-        bool create(cJSON *id_object, const cJSON *create_obj);
+        bool create(cJSON *id_object, cJSON *create_obj);
         bool update(const cJSON *update_obj);
         bool destroy(const cJSON *destroy_obj);
         bool load(cJSON *session, const std::string& session_name);
         bool save(const std::string& session_name);
 
     private:
-        struct Impl;
-        Impl *pimpl;
+        mongo::DBClientConnection *db;
     };
 }
 
