@@ -30,9 +30,11 @@
 #include <algorithm>
 #include <vector>
 #include <iostream>
+#include <set>
 
 using mongo::BSONObj;
 using mongo::BSONElement;
+using mongo::Query;
 
 csConnect::Session::Session()
 {
@@ -89,16 +91,16 @@ csConnect::Session::~Session()
     delete db;
 }
 
-bool csConnect::Session::create(cJSON *id_object, const std::string& ns, cJSON *create_obj)
+bool csConnect::Session::create(cJSON *id_object, const std::string& ns, const cJSON *create_obj)
 {
     try
     {
         /* insert the object into the database */
-        cJSON *cid_obj = cJSON_GetObjectItem(create_obj, "CID");
+        cJSON *cid_obj = cJSON_GetObjectItem(const_cast<cJSON *>(create_obj), "CID");
         if (!cid_obj)
             return false;
         int cid = cid_obj->valueint;
-        std::string json_str = cJSON_PrintUnformatted(create_obj);
+        std::string json_str = cJSON_PrintUnformatted(const_cast<cJSON *>(create_obj));
         BSONObj create_b = mongo::fromjson(json_str);
         db->insert(ns, create_b);
         
@@ -143,14 +145,84 @@ bool csConnect::Session::destroy(const std::string& ns, const cJSON *destroy_obj
 
 bool csConnect::Session::update(const std::string& ns, const cJSON *update_obj)
 {
+    if (!update_obj)
+        return false;
     
-    return false;
+    char *json_str = cJSON_PrintUnformatted(const_cast<cJSON *>(update_obj));
+    BSONObj bson_obj = mongo::fromjson(json_str);
+    free(json_str);
+
+    BSONElement id_elem;
+    if (bson_obj.getObjectID(id_elem))
+        return false; /* should never pass in an object with a bson id */
+
+    BSONElement oid_elem = bson_obj["OID"];
+    if (oid_elem.eoo())
+        return false;
+
+    std::string oid_str = oid_elem.String();
+    mongo::OID new_oid;
+    new_oid.init(oid_str);
+    BSONObj new_obj = BSON("_id" << new_oid);
+
+    std::vector<BSONElement> elem_list;
+    bson_obj.elems(elem_list);
+
+    mongo::BSONObjBuilder builder;
+    builder.appendElements(new_obj);
+    for (std::vector<BSONElement>::iterator it = elem_list.begin(); it != elem_list.end(); ++it)
+    {
+        if (strcmp("OID", it->fieldName()) != 0)
+            builder.append(*it);
+    }
+    
+    BSONObj final = builder.obj();
+    
+    Query query = QUERY("_id" << new_oid);
+    try
+    {
+        db->update(ns, query, final);
+    }
+    catch(mongo::AssertionException& e)
+    {
+        return false;
+    }
+                         
+    return true;
 }
 
-bool csConnect::Session::load(cJSON *session, const std::string& session_name)
+bool csConnect::Session::read(std::vector<cJSON *>& objects, const std::string& ns, const cJSON *query_obj)
+{
+    if (query_obj)
+        return false; /* not implemented yet */
+    auto_ptr<mongo::DBClientCursor> cursor = db->query(ns, mongo::BSONObj());
+    while (cursor->more())
+    {
+        BSONObj current = cursor->next();
+
+        BSONElement id_elem;
+        current.getObjectID(id_elem);
+        BSONObj oid_obj = BSON("OID" << id_elem.OID().toString());
+
+        mongo::BSONObjBuilder builder;
+        builder.appendElements(oid_obj);
+        builder.appendElements(current);
+        
+        BSONObj new_obj = builder.obj();
+
+        std::string json_str = new_obj.jsonString();
+        cJSON *json_obj = cJSON_Parse(json_str.c_str());
+        cJSON_DeleteItemFromObject(json_obj, "_id");
+        objects.push_back(json_obj);
+    }
+    
+    return true;
+}
+
+bool csConnect::Session::load(std::vector<cJSON *>& session, const std::string& session_name)
 {
     
-    return false;
+    return read(session, session_name, NULL);
 }
 
 

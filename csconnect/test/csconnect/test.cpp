@@ -23,6 +23,7 @@
 
 #include <string>
 #include <iostream>
+#include <vector>
 
 #include "UnitTest++.h"
 #include "TestReporterStdout.h"
@@ -35,6 +36,7 @@
 
 using namespace csConnect;
 using std::string;
+using std::vector;
 
 //string servername = "109.171.139.4";
 QUuid *s_oid = NULL;
@@ -98,29 +100,41 @@ TEST_FIXTURE(DBClient, Object_create)
     CHECK(oid);
 }
 
+TEST_FIXTURE(DBClient, Object_Update)
+{
+    vector<cJSON *> objects;
+    CHECK(session.read(objects, ns, NULL));
+    
+    CHECK(objects.size() > 0);
+    if (objects.size() > 0)
+    {
+        cJSON_AddStringToObject(objects[0], "FOO", "BAR");
+        CHECK(session.update(ns, objects[0]));
+    }
+}
+
+#if 0
 TEST_FIXTURE(DBClient, Object_remove_oid)
 {
     /* this test must be called after Object_create */
-//    CHECK(oid);
-//    cJSON* oid_obj = cJSON_CreateObject();
-//    cJSON_AddStringToObject(oid_obj, "OID", oid->toString().toStdString().c_str());
-//    CHECK(session.destroy(ns, oid_obj));
+    CHECK(oid);
+    cJSON* oid_obj = cJSON_CreateObject();
+    cJSON_AddStringToObject(oid_obj, "OID", oid->toString().toStdString().c_str());
+    CHECK(session.destroy(ns, oid_obj));
+}
+#endif
+
+
+TEST_FIXTURE(DBClient, Session_Load)
+{
+    std::vector<cJSON *> objects;
+    CHECK(session.load(objects, ns));
 }
 
 TEST_FIXTURE(DBClient, Object_remove)
 {
     CHECK(session.destroy(ns, json_obj));
-
-}
-
-TEST_FIXTURE(DBClient, Object_Update)
-{
-    CHECK(session.update(ns, NULL));
-}
-
-TEST_FIXTURE(DBClient, Session_Load)
-{
-    CHECK(session.load(NULL, "blah"));
+    
 }
 
 int main(int, char const *[])

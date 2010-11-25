@@ -63,13 +63,14 @@ namespace csConnect
         bool getSessionNames(std::string& sessions);
 
         /* not happy with the use of ns here - too mongo like - this will likely change */
-        bool create(cJSON *id_object, const std::string& ns, cJSON *create_obj);
+        bool create(cJSON *id_object, const std::string& ns, const cJSON *create_obj);
+        bool read(std::vector<cJSON *>& objects, const std::string& ns, const cJSON *query_obj);
         bool update(const std::string& ns, const cJSON *update_obj);
         /** Destroys the object(s) with the OID(s) in destroy_obj. 
          *  Default value for destroy_obj is NULL this will erase the entire
          *  namespace specified by ns. */
         bool destroy(const std::string& ns, const cJSON *destroy_obj = NULL);
-        bool load(cJSON *session, const std::string& session_name);
+        bool load(std::vector<cJSON *>& session, const std::string& session_name);
         bool save(const std::string& session_name);
 
     private:
