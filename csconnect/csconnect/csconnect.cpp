@@ -141,4 +141,16 @@ bool csConnect::Session::destroy(const std::string& ns, const cJSON *destroy_obj
     return true;
 }
 
+bool csConnect::Session::update(const std::string& ns, const cJSON *update_obj)
+{
+    
+    return false;
+}
+
+bool csConnect::Session::load(cJSON *session, const std::string& session_name)
+{
+    
+    return false;
+}
+
 

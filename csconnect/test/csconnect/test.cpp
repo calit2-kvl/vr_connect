@@ -37,29 +37,53 @@ using std::string;
 
 struct DBClient
 {
+    DBClient() : servername("127.0.0.1"), ns("devel.test"), json_obj(NULL), reply_obj(NULL) { CHECK(init()); }
+    ~DBClient() { if (json_obj) cJSON_Delete(json_obj); if (reply_obj) cJSON_Delete(reply_obj); }
+    bool init() { return session.connect(servername); }
+    void create_json() {
+        json_obj = cJSON_CreateObject();
+        CHECK(json_obj);
+        cJSON_AddStringToObject(json_obj, "TEST", "DATA");
+        cJSON_AddNumberToObject(json_obj, "CID", 2334345);
+        reply_obj = cJSON_CreateObject();
+        CHECK(reply_obj);
+    }
+
     Session session;
     string servername;
     string ns;
-    DBClient() : servername("127.0.0.1"), ns("devel.test") {}
+    cJSON *json_obj;
+    cJSON *reply_obj;
 };
 
 TEST_FIXTURE(DBClient, Sesssion_connect)
 {
-    CHECK(session.connect(servername));
+    /* this test is not empty - it exists to check the connection to the database
+     * which is called by the constructor. */
 }
-
 
 TEST_FIXTURE(DBClient, Object_create)
 {
-    /* connect */
-    CHECK(session.connect(servername));
-    CHECK(session.destroy(ns, NULL));
-    cJSON *json_obj = cJSON_CreateObject();
-    CHECK(json_obj);
-    cJSON_AddStringToObject(json_obj, "TEST", "DATA");
-    cJSON_AddNumberToObject(json_obj, "CID", 2334345);
-    cJSON *reply;
-    CHECK(session.create(reply, ns, json_obj));
+    /* erase the entire namespace */
+    CHECK(session.destroy(ns));
+    create_json();
+    CHECK(session.create(reply_obj, ns, json_obj));
+}
+
+TEST_FIXTURE(DBClient, Object_remove)
+{
+    /* this test must be called after Object_create */
+    
+}
+
+TEST_FIXTURE(DBClient, Object_Update)
+{
+    CHECK(session.update(ns, NULL));
+}
+
+TEST_FIXTURE(DBClient, Session_Load)
+{
+    CHECK(session.load(NULL, "blah"));
 }
 
 int main(int, char const *[])
