@@ -51,29 +51,6 @@ namespace mongo {class DBClientConnection;}
 /** csConnect functionality */
 namespace csConnect
 {
-    struct OID
-    {
-        union
-        {
-            struct
-            {
-                uint64_t a;
-                uint32_t b;
-            };
-            uint8_t data[12];
-        };
-        OID() : a(0), b(0) {}
-    };
-    
-    inline bool operator==(const OID& l, const OID& r) { return l.a == r.a && l.b == r.b; }
-    inline bool operator!=(const OID& l, const OID& r) { return l.a != r.a || l.b != r.b; }
-    
-    namespace OIDOps
-    {
-        std::string toString(const OID& oid);
-        
-    }
-
     class Session
     {
     public:

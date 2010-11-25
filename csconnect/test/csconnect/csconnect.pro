@@ -1,7 +1,7 @@
 TEMPLATE = app
 SOURCES = test.cpp
 INCLUDEPATH += ../../csconnect/interface ../UnitTest++ ../../../common
-QT -= core gui
+QT -= gui
 macx:CONFIG -= app_bundle x86
 macx:CONFIG += x86_64
 LIBS += -L../lib \
