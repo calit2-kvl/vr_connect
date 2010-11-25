@@ -49,6 +49,29 @@ struct cJSON;
 namespace mongo {class DBClientConnection;}
 namespace csConnect
 {
+    struct OID
+    {
+        union
+        {
+            struct
+            {
+                uint64_t a;
+                uint32_t b;
+            };
+            uint8_t data[12];
+        };
+        OID() : a(0), b(0) {}
+    };
+    
+    inline bool operator==(const OID& l, const OID& r) { return l.a == r.a && l.b == r.b; }
+    inline bool operator!=(const OID& l, const OID& r) { return l.a != r.a || l.b != r.b; }
+    
+    namespace OIDOps
+    {
+        std::string toString(const OID& oid);
+        
+    }
+
     class Session
     {
     public:
@@ -60,9 +83,10 @@ namespace csConnect
         /** return a comma separated list of available sessions. */
         bool getSessionNames(std::string& sessions);
 
-        bool create(cJSON *id_object, cJSON *create_obj);
-        bool update(const cJSON *update_obj);
-        bool destroy(const cJSON *destroy_obj);
+        /* not happy with the use of ns here - too mongo like - this will likely change */
+        bool create(cJSON *id_object, const std::string& ns, cJSON *create_obj);
+        bool update(const std::string& ns, const cJSON *update_obj);
+        bool destroy(const std::string& ns, const cJSON *destroy_obj);
         bool load(cJSON *session, const std::string& session_name);
         bool save(const std::string& session_name);
 

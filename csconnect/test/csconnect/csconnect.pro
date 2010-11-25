@@ -10,7 +10,11 @@ LIBS += -L../lib \
         -lcommon \
         -lcsconnect \
         -lUnitTest++ \
-        -lboost_thread \
         -lmongoclient
+        
+# unix:LIBS += -lboost_thread 
+
+macx:LIBS += -L../../../../../dependencies/mongo -lboost_thread-mt -lboost_system-mt
+
 
 

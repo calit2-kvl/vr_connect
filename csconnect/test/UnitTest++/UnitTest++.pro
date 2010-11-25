@@ -24,5 +24,7 @@ SOURCES = Test.cpp \
 
 win32:SOURCES += Win32/TimeHelpers.cpp
 macx|unix:SOURCES += Posix/TimeHelpers.cpp Posix/SignalTranslator.cpp
+macx:CONFIG -= app_bundle x86
+macx:CONFIG += x86_64
 
 

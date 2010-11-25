@@ -29,6 +29,10 @@
 #include <string>
 #include <algorithm>
 #include <vector>
+#include <iostream>
+
+using mongo::BSONObj;
+using mongo::BSONElement;
 
 csConnect::Session::Session()
 {
@@ -85,19 +89,56 @@ csConnect::Session::~Session()
     delete db;
 }
 
-bool csConnect::Session::create(cJSON *id_object, cJSON *create_obj)
+bool csConnect::Session::create(cJSON *id_object, const std::string& ns, cJSON *create_obj)
 {
     try
     {
-        mongo::BSONObj create_b = mongo::BSONObj(cJSON_PrintUnformatted(create_obj));
-        db->insert("devel_test", create_b);
+        /* insert the object into the database */
+        cJSON *cid_obj = cJSON_GetObjectItem(create_obj, "CID");
+        if (!cid_obj)
+            return false;
+        int cid = cid_obj->valueint;
+        std::string json_str = cJSON_PrintUnformatted(create_obj);
+        BSONObj create_b = mongo::fromjson(json_str);
+        db->insert(ns, create_b);
+        
+        /* find out what its ID is */
+        BSONObj query_obj = BSON("CID" << cid);
+        auto_ptr<mongo::DBClientCursor> cursor = db->query(ns, BSONObj());
+        
+        if (!cursor->more())
+            return false;
+        
+        BSONObj result_b = cursor->next();
+
+        
+        BSONElement new_id;
+        result_b.getObjectID(new_id);
+
+        cJSON_AddStringToObject(id_object,"CMD", "UPDATE");
+        cJSON_AddStringToObject(id_object,"ATTR", "OID");
+        cJSON_AddNumberToObject(id_object, "CID", cid);
+        cJSON_AddStringToObject(id_object, "OID", new_id.OID().toString().c_str());
+        /* we don't want there to be anymore */
+        if (cursor->more())
+            return false;
     }
-    catch (...)
+    catch (mongo::DBException &e)
     {
         return false;
     }
     return true;
-    
-    
-    return false;
 }
+
+bool csConnect::Session::destroy(const std::string& ns, const cJSON *destroy_obj)
+{
+    /* passing a NULL destroy object will erase the whole collection */
+    
+    if (!destroy_obj)
+        db->remove(ns, BSONObj());
+    else 
+        return false; /* not implemented yet */
+    return true;
+}
+
+

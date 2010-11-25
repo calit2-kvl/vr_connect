@@ -33,28 +33,33 @@
 using namespace csConnect;
 using std::string;
 
-struct DBClientTest
-{
-   DBClientTest() : servername("109.171.139.4"){}
+//string servername = "109.171.139.4";
 
-   Session session;
-   string servername;
+struct DBClient
+{
+    Session session;
+    string servername;
+    string ns;
+    DBClient() : servername("127.0.0.1"), ns("devel.test") {}
 };
 
-TEST_FIXTURE(DBClientTest, Sesssion_connect)
+TEST_FIXTURE(DBClient, Sesssion_connect)
 {
     CHECK(session.connect(servername));
 }
 
 
-TEST_FIXTURE(DBClientTest, Object_create)
+TEST_FIXTURE(DBClient, Object_create)
 {
+    /* connect */
     CHECK(session.connect(servername));
+    CHECK(session.destroy(ns, NULL));
     cJSON *json_obj = cJSON_CreateObject();
     CHECK(json_obj);
     cJSON_AddStringToObject(json_obj, "TEST", "DATA");
+    cJSON_AddNumberToObject(json_obj, "CID", 2334345);
     cJSON *reply;
-    CHECK(session.create(json_obj, reply));
+    CHECK(session.create(reply, ns, json_obj));
 }
 
 int main(int, char const *[])
