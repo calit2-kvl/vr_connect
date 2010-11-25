@@ -44,7 +44,7 @@ QUuid *s_oid = NULL;
 struct DBClient
 {
     
-    DBClient() : servername("127.0.0.1"), ns("devel.test"), json_obj(NULL), reply_obj(NULL), oid(NULL) 
+    DBClient() : servername("109.171.139.4"), ns("devel.test"), json_obj(NULL), reply_obj(NULL), oid(NULL) 
     { 
         CHECK(init()); 
     }

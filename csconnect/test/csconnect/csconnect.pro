@@ -12,7 +12,7 @@ LIBS += -L../lib \
         -lUnitTest++ \
         -lmongoclient
         
-# unix:LIBS += -lboost_thread 
+unix:LIBS += -lboost_thread 
 
 macx:LIBS += -L../../../../../dependencies/mongo -lboost_thread-mt -lboost_system-mt
 

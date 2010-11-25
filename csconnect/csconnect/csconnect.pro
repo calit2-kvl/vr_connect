@@ -2,7 +2,7 @@ TARGET = csconnect
 LANGUAGE = C++
 TEMPLATE = lib
 DESTDIR = ../lib
-#CONFIG = staticlib
+CONFIG = staticlib
 
 macx:MONGOPATH = ../../../../dependencies
 
