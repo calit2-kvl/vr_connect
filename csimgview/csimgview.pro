@@ -70,7 +70,7 @@ linux-g++ {
 # -g++-64
 # ---------------------------------------------------------------------------
 linux-g++-64 {
- QT                   =
+ QT                   = core
  LIBS                += -L/usr/lib64 -L/usr/local/lib/ -lMagick++ -L/usr/local/cglX/lib/ -lcglX -L/opt/cglx/lib64
  INCLUDEPATH         += /usr/local/include/ImageMagick $${ADD_INCDIR} /usr/local/cglX/include /opt/cglx/include
  # clean it

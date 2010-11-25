@@ -132,23 +132,10 @@ bool csConnect::Session::create(cJSON *id_object, const std::string& ns, const c
     return true;
 }
 
-bool csConnect::Session::destroy(const std::string& ns, const cJSON *destroy_obj)
-{
-    /* passing a NULL destroy object will erase the whole collection */
-    
-    if (!destroy_obj)
-        db->remove(ns, BSONObj());
-    else 
-        return false; /* not implemented yet */
-    return true;
-}
 
-bool csConnect::Session::update(const std::string& ns, const cJSON *update_obj)
+bool bsonFromJson(BSONObj& final, mongo::OID& new_oid, const cJSON *json_obj)
 {
-    if (!update_obj)
-        return false;
-    
-    char *json_str = cJSON_PrintUnformatted(const_cast<cJSON *>(update_obj));
+    char *json_str = cJSON_PrintUnformatted(const_cast<cJSON *>(json_obj));
     BSONObj bson_obj = mongo::fromjson(json_str);
     free(json_str);
 
@@ -161,7 +148,6 @@ bool csConnect::Session::update(const std::string& ns, const cJSON *update_obj)
         return false;
 
     std::string oid_str = oid_elem.String();
-    mongo::OID new_oid;
     new_oid.init(oid_str);
     BSONObj new_obj = BSON("_id" << new_oid);
 
@@ -175,9 +161,36 @@ bool csConnect::Session::update(const std::string& ns, const cJSON *update_obj)
         if (strcmp("OID", it->fieldName()) != 0)
             builder.append(*it);
     }
-    
-    BSONObj final = builder.obj();
-    
+    final = builder.obj();
+}
+
+bool csConnect::Session::destroy(const std::string& ns, const cJSON *destroy_obj)
+{
+    /* passing a NULL destroy object will erase the whole collection */
+    if (!destroy_obj)
+        db->remove(ns, BSONObj());
+    else 
+	{
+		BSONObj final;
+		mongo::OID new_oid;
+		if (!bsonFromJson(final, new_oid, destroy_obj))
+			return false;
+		Query query = QUERY("_id" << new_oid);
+		db->remove(ns, query);
+	}
+    return true;
+}
+
+bool csConnect::Session::update(const std::string& ns, const cJSON *update_obj)
+{
+    if (!update_obj)
+        return false;
+	
+	BSONObj final; 
+	mongo::OID new_oid;
+	if(!bsonFromJson(final, new_oid,update_obj))
+		return false;    
+
     Query query = QUERY("_id" << new_oid);
     try
     {
@@ -193,9 +206,18 @@ bool csConnect::Session::update(const std::string& ns, const cJSON *update_obj)
 
 bool csConnect::Session::read(std::vector<cJSON *>& objects, const std::string& ns, const cJSON *query_obj)
 {
-    if (query_obj)
-        return false; /* not implemented yet */
-    auto_ptr<mongo::DBClientCursor> cursor = db->query(ns, mongo::BSONObj());
+    auto_ptr<mongo::DBClientCursor> cursor;
+    if (!query_obj)
+ 		cursor = db->query(ns, mongo::BSONObj());
+	else
+	{
+		BSONObj final;
+		mongo::OID new_oid;
+		if (!bsonFromJson(final, new_oid, query_obj)) 
+			return false;
+		cursor = db->query(ns, final);	
+	}
+	 
     while (cursor->more())
     {
         BSONObj current = cursor->next();

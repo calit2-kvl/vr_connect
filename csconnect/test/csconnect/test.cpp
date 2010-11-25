@@ -111,6 +111,10 @@ TEST_FIXTURE(DBClient, Object_Update)
         cJSON_AddStringToObject(objects[0], "FOO", "BAR");
         CHECK(session.update(ns, objects[0]));
     }
+
+    vector<cJSON *> objects2;
+    CHECK(session.read(objects2, ns, objects[0])); 
+    CHECK(objects2.size() == 1);
 }
 
 #if 0

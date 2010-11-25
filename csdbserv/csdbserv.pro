@@ -17,7 +17,7 @@ QT  =
 # common settings  !! Use just the release
 # ---------------------------------------------------------------------------
 DESTDIR = ./bin
-ADD_INCDIR = ../csconnect/interface ../common
+ADD_INCDIR = ../csconnect/csconnect/interface ../common
 MY_INCDIR = ./include
 MY_SRCDIR = ./src
 UI_DIR = .ui
@@ -33,7 +33,7 @@ HEADERS = $${MY_INCDIR}/main.h
 
 SOURCES = $${MY_SRCDIR}/main.cpp
 
-LIBS += -L../common -lcommon
+LIBS += -L../common -lcommon -L../csconnect/lib -lcsconnect
 # ---------------------------------------------------------------------------
 # linux
 # -g++ 32bit
@@ -51,7 +51,7 @@ linux-g++ {
 # -g++ 64bit
 # ---------------------------------------------------------------------------
 linux-g++-64 {
-    LIBS += -L /usr/lib64 -luuid -L /usr/local/cglX/lib -lcglXnet
+    LIBS += -L /usr/lib64 -luuid -L /usr/local/cglX/lib -lcglXnet -lmongoclient -lboost_thread
     INCLUDEPATH += $${MY_INCDIR} $${ADD_INCDIR} /usr/local/cglX/include
 
     # clean it

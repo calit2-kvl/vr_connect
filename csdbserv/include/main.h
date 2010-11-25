@@ -17,6 +17,7 @@
 #include <signal.h>
 #include <stdint.h>
 #include "cJSON.h"
+#include <string>
 /*! \file main.h
  *
  */
@@ -37,6 +38,7 @@
  *  \date   2010
  *
  */
+namespace csConnect { class Session; }
 class dbserver: public cglXServer
 {
 
@@ -64,6 +66,8 @@ public:
 protected:
 
 private:
+   csConnect::Session *_dbconnect;
+   std::string _sessionname;
 
 };
 

@@ -31,6 +31,8 @@
 // -------------------------------------------------------------------------------------+
 #include <stdlib.h>
 #include <stdio.h>
+#include <QtCore/QUuid>
+
 
 #ifdef __APPLE__
         #include <cglX/cglX.h>
@@ -335,7 +337,7 @@ public:
         if(blob!=0)delete blob;
     }
 
-    uint64_t    getOID(void)            {return OID;}
+    QUuid       getOID(void)            {return OID;}
     int         getUID(void)            {return UID;}
     const char *getURI(void)            {return c_uri.c_str();}
     int         getTID(void)            {return TID;}
@@ -348,7 +350,7 @@ public:
     float       getScaleX(void)         {return scalex;}
     float       getScaleY(void)         {return scaley;}
 
-    void        setOID(uint64_t _OID)   {OID    = _OID;}
+    void        setOID(QUuid _OID)   {OID    = _OID;}
     void        setUID(int _UID)        {UID    = _UID;}
     void        setURI(const char* _uri){c_uri.assign(_uri);}
     void        setTID(GLuint _TID)     {TID    = _TID;}
@@ -526,7 +528,7 @@ public:
     typedef     std::map<int, csWindow*>::reverse_iterator im_riter;
 
     // object map iterator
-    typedef     std::map<uint64_t, csWindow*>::iterator om_iter;
+    typedef     std::map<QUuid, csWindow*>::iterator om_iter;
     typedef     std::map<uint64_t, csWindow*>::reverse_iterator om_riter;
 
     // mutex to protect the raw data
@@ -540,7 +542,7 @@ public:
 private:
     // container information
     int                 UID;            // user ID
-    uint64_t            OID;            // object ID
+    QUuid               OID;            // object ID
     GLuint              TID;            // texture ID
     float               posx;
     float               posy;

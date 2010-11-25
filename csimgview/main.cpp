@@ -48,7 +48,7 @@ pthread_mutex_t obj_list_mutex;
 // -------------------------------------------------------------------------------------+
 std::list<csWindow*> m_windowList;                  // list of objects
 std::map<int,csWindow*> m_InteractionMap;           // use user id to find object
-std::map<uint64_t,csWindow*> m_DBObjectMap;         // use db object id to find object
+std::map<QUuid,csWindow*> m_DBObjectMap;         // use db object id to find object
 
 std::list<csWidget*> m_widgetList;                  // list of widgets
 
@@ -275,7 +275,7 @@ void loadImage(csWindow  *_newWin)
     //printf("Add window with ID: %d \n",newWindow->getOID());
 }
 
-int removeObject(uint64_t _oid)
+int removeObject(QUuid _oid)
 {
     // erase from object map
     csWindow::om_iter map_iter = m_DBObjectMap.find(_oid);
@@ -334,7 +334,7 @@ bool checkWidgetHit(vec2f_P vec=NULL, int UserID=-1, int button=0, int state=-1,
                 if(iter!=m_InteractionMap.end())
                 {
                     window  = iter->second;
-                    uint64_t _oid   = window->getOID();
+                    QUuid _oid   = window->getOID();
 
                     if(window->session_obj)
                     {
@@ -347,7 +347,7 @@ bool checkWidgetHit(vec2f_P vec=NULL, int UserID=-1, int button=0, int state=-1,
                             cJSON *json_send;
                             json_send=cJSON_CreateObject();
                             cJSON_AddStringToObject(json_send,"CMD",     "DELETE");
-                            cJSON_AddNumberToObject(json_send,"OID",     window->getOID());
+                            cJSON_AddStringToObject(json_send,"OID",     window->getOID().toString().toStdString().c_str());
                             send_out=cJSON_PrintUnformatted(json_send);
                             cJSON_Delete(json_send);
 
@@ -818,14 +818,14 @@ void customMSGfunc(int len, unsigned char *msg)
             // it will do for now.
             // -------------------------------------
             csWindow* window = NULL;
-            uint64_t    _oid = -1;
+            QUuid    _oid;
             if(strcmp(item->valuestring,        "UPDATE"    )==0)
             {
                 item    = cJSON_GetObjectItem(json_read,"ATTR");
                 if(strcmp(item->valuestring,"OID")==0)              // update object ID
                 {
-                    int   _cid      = cJSON_GetObjectItem(json_read,"CID")->valueint;
-                    _oid            = cJSON_GetObjectItem(json_read,"OID")->valueint;
+                    QUuid   _cid      = QUuid(QString(cJSON_GetObjectItem(json_read,"CID")->valuestring));
+                    _oid            = QUuid(QString(cJSON_GetObjectItem(json_read,"OID")->valuestring));
 
                     csWindow::om_iter iter = m_DBObjectMap.find(_cid);
                     if(iter!=m_DBObjectMap.end())
@@ -835,12 +835,12 @@ void customMSGfunc(int len, unsigned char *msg)
                         window->session_obj = true;
                         // remove object  from map and add it with a new oid
                         m_DBObjectMap.erase (iter);
-                        m_DBObjectMap.insert(std::pair<uint64_t,csWindow*>(window->getOID(), window));
+                        m_DBObjectMap.insert(std::pair<QUuid,csWindow*>(window->getOID(), window));
                     }
                 }
                 else if(strcmp(item->valuestring,"POS")==0)         // update object position
                 {
-                    _oid            = cJSON_GetObjectItem(json_read,"OID")->valueint;
+                    _oid            = QUuid(QString(cJSON_GetObjectItem(json_read,"OID")->valuestring));
 
                     csWindow::om_iter iter = m_DBObjectMap.find(_oid);
                     if(iter!=m_DBObjectMap.end())
@@ -860,7 +860,7 @@ void customMSGfunc(int len, unsigned char *msg)
                 }
                 else if(strcmp(item->valuestring,"SCALE")==0)     // update object scale
                 {
-                    _oid            = cJSON_GetObjectItem(json_read,"OID")->valueint;
+                    _oid            = QUuid(QString(cJSON_GetObjectItem(json_read,"OID")->valuestring));
 
                     //window      = m_DBObjectMap[_oid];        // if we know the object is in map !!
 
@@ -911,7 +911,7 @@ void customMSGfunc(int len, unsigned char *msg)
                     // create new object
                     // ------------------------------------
                     window  = new csWindow();
-                    window->setOID(cJSON_GetObjectItem(json_read,"OID")->valueint);
+                    window->setOID(QUuid(QString(cJSON_GetObjectItem(json_read,"OID")->valuestring)));
                     window->setURI(cJSON_GetObjectItem(json_read,"URI")->valuestring);
                     window->session_obj  = true;     // object is already in database
                     window->setImageDim(cJSON_GetObjectItem(json_read,"WIDTH")->valueint, cJSON_GetObjectItem(json_read,"HEIGHT")->valueint);
@@ -938,7 +938,7 @@ void customMSGfunc(int len, unsigned char *msg)
                     // add object to list and map
                     // ------------------------------------
                     m_windowList.push_front (window);
-                    m_DBObjectMap.insert(std::pair<uint64_t,csWindow*>(window->getOID(), window));
+                    m_DBObjectMap.insert(std::pair<QUuid,csWindow*>(window->getOID(), window));
 
                     // ------------------------------------------
                     // start image loading
@@ -950,7 +950,7 @@ void customMSGfunc(int len, unsigned char *msg)
             {
                 //jsonToConsol(json_read);
 
-                uint64_t _oid     = cJSON_GetObjectItem(json_read,"OID")->valueint;
+                QUuid _oid     = QUuid(QString(cJSON_GetObjectItem(json_read,"OID")->valuestring));
 
                 // erase from object map and list
                 int uid=removeObject(_oid);
@@ -999,16 +999,17 @@ void customMSGfunc(int len, unsigned char *msg)
                     // create new object
                     // ------------------------------------
                     csWindow    *newWindow  = new csWindow();
-                    uint64_t    _oid    = cJSON_GetObjectItem(json_read,"OID")->valueint;
+                    QUuid    _oid    = QUuid(QString(cJSON_GetObjectItem(json_read,"OID")->valuestring));
                     newWindow->setURI(cJSON_GetObjectItem(json_read,"URI")->valuestring);
-                    if(_oid!=-1)
+                    if(_oid!=QUuid(QString(-1)))
                     {
                         newWindow->setOID(_oid);
                         newWindow->session_obj  = true;     // object is already in database
                     }
                     else
                     {
-                        newWindow->setOID(my_id_pool.getID());
+                        int _cid = my_id_pool.getID();
+                        newWindow->setOID(QUuid(QString(_cid)));
                         newWindow->session_obj  = false;    // object is still local
                     }
                     // ------------------------------------
@@ -1061,7 +1062,7 @@ void customMSGfunc(int len, unsigned char *msg)
                     // add object to list and map
                     // ------------------------------------
                     m_windowList.push_front (newWindow);
-                    m_DBObjectMap.insert(std::pair<uint64_t,csWindow*>(newWindow->getOID(), newWindow));
+                    m_DBObjectMap.insert(std::pair<QUuid,csWindow*>(newWindow->getOID(), newWindow));
 
                     // ----------------------------------------
                     // create a json message to database
@@ -1072,7 +1073,7 @@ void customMSGfunc(int len, unsigned char *msg)
                         cJSON *json_send;
                         json_send=cJSON_CreateObject();
                         cJSON_AddStringToObject(json_send,"CMD",     "CREATE");
-                        cJSON_AddNumberToObject(json_send,"CID",     newWindow->getOID());
+                        cJSON_AddStringToObject(json_send,"CID",     newWindow->getOID().toString().toStdString().c_str());
                         cJSON_AddStringToObject(json_send,"TYPE",    "Image");
                         cJSON_AddStringToObject(json_send,"URI",     newWindow->getURI());
                         cJSON_AddNumberToObject(json_send,"WIDTH",   _w);
@@ -1217,7 +1218,7 @@ void motionfunc(int x,int y)
                     cJSON *json_send=NULL;
                     json_send=cJSON_CreateObject();
                     cJSON_AddStringToObject(json_send,"CMD",     "UPDATE");
-                    cJSON_AddNumberToObject(json_send,"OID",     window->getOID());
+                    cJSON_AddStringToObject(json_send,"OID",     window->getOID().toString().toStdString().c_str());
 
                     if(button==CGLX_LEFT_BUTTON)
                     {

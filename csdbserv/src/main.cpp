@@ -33,6 +33,8 @@
 #include <list>
 #include <string>
 #include <iostream>
+#include <assert.h>
+#include "csconnect.h"
 
 // -----------------------------------------------------------------------------+
 // GLOBALS
@@ -103,11 +105,14 @@ dbserver::dbserver( cs_hci_type_E type, int port, cs_serv_mode_E mode)
  : cglXServer( type, port, mode)
 
 {
+    _dbconnect = new csConnect::Session;
+    _dbconnect->connect("109.171.139.4");
 
+    _sessionname = "cglX.default";
 }
 dbserver::~dbserver()
 {
-
+    delete _dbconnect;
 }
 // signal connect
 void dbserver::signal_connected(const int PID, const char *IP, const int World, const int UID )
@@ -152,6 +157,7 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
     // -------------------------------------
     if(strcmp(item->valuestring,"CREATE")==0)
     {
+#if 0
         // ----------------------------------------
         // read client object id
         // ----------------------------------------
@@ -176,7 +182,12 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
         send_out=cJSON_PrintUnformatted(json_send);
         cJSON_Delete(json_send);
         json_send=NULL;
-
+#else
+        cJSON *json_send=NULL;
+        json_send=cJSON_CreateObject();
+	bool success = _dbconnect->create(json_send, _sessionname, json_read);
+        send_out=cJSON_PrintUnformatted(json_send);
+#endif
         // ----------------------------------------
         // we send this only to the creating client
         // to update his object map
@@ -188,6 +199,7 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
         // ----------------------------------------
         //  Send a CREATE to all other clients
         // ----------------------------------------
+#if 0
         json_send=cJSON_CreateObject();
         cJSON_AddStringToObject(json_send,"CMD",     "CREATE");
         cJSON_AddNumberToObject(json_send,"OID",     uoid);
@@ -218,8 +230,13 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
             scale[1]    = cJSON_GetArrayItem(item, 1)->valuedouble;
             cJSON_AddItemToObject(json_send,"SCALE", cJSON_CreateFloatArray(scale,2));
         }
+#else
+	std::vector<cJSON *> objs;	
+	_dbconnect->read(objs, _sessionname, json_send);
+	assert(objs.size() == 1);
+#endif
 
-        send_out=cJSON_PrintUnformatted(json_send);
+        send_out=cJSON_PrintUnformatted(objs[0]);
         //printf(send_out);
         //fflush(stdout);
         cJSON_Delete(json_send);
@@ -234,6 +251,7 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
         //  Send an UPDATE to all other clients
         // ----------------------------------------
         send_out=cJSON_PrintUnformatted(json_read);
+	_dbconnect->update(_sessionname, json_read);
         setWaitTime (0);
         sendData((char*) send_out, strlen(send_out), PID, true);
         free(send_out);
@@ -244,6 +262,7 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
         // ----------------------------------------
         //  Send an UPDATE to all other clients
         // ----------------------------------------
+	_dbconnect->destroy(_sessionname, json_read);
         send_out=cJSON_PrintUnformatted(json_read);
         setWaitTime (0);
         sendData((char*) send_out, strlen(send_out), PID, true);
