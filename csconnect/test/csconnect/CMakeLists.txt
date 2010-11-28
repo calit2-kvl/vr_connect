@@ -12,7 +12,7 @@ TARGET_LINK_LIBRARIES(csconnect_test
 					  common
 					  csconnect
 					  UnitTest++ 
-					  ${MongoDB_LIBRARY}
+					  ${MONGODB_LIBRARIES}
 					  ${Boost_LIBRARIES}
 					  ${QT_QTCORE_LIBRARY}
 					 )

@@ -13,7 +13,7 @@ target_link_libraries(csdbserv
 					  common
 					  csconnect
 					  ${CGLX_LIBRARIES}
-					  ${MongoDB_LIBRARIES}
+					  ${MONGODB_LIBRARIES}
 					  ${Boost_LIBRARIES}
 					 )
 
