@@ -1,0 +1,2 @@
+ADD_SUBDIRECTORY(csconnect)
+ADD_SUBDIRECTORY(test)

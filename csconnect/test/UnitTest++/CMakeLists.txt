@@ -1,6 +1,6 @@
-project(UnitTest++)
 
 set(SOURCES
+    AssertException.cpp
     Test.cpp
     Checks.cpp
     TestRunner.cpp
@@ -24,5 +24,7 @@ else (WIN32)
     set (SOURCES ${SOURCES} Posix/TimeHelpers.cpp Posix/SignalTranslator.cpp)
 endif (WIN32)
 
-add_library(UnitTest++ ${SOURCES})
+add_library(UnitTest++ STATIC ${SOURCES})
+
+SET_TARGET_PROPERTIES(UnitTest++ PROPERTIES COMPILE_FLAGS "-g -Wall -W -Winline -ansi") 
 

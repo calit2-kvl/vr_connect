@@ -2,7 +2,8 @@
 *.swp
 *.o
 *usero
-KAUST-CODE.pro.user
 Makefile
 bin
 *.a
+*.user
+cmaketest
