@@ -232,7 +232,9 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
         }
 #else
 	std::vector<cJSON *> objs;	
-	_dbconnect->read(objs, _sessionname, json_send);
+        std::cout << objs.size() << '\n';
+        _dbconnect->read(objs, _sessionname, json_send);
+        std::cout << objs.size() << '\n';
 	assert(objs.size() == 1);
 #endif
 

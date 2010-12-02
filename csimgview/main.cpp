@@ -987,7 +987,7 @@ void customMSGfunc(int len, unsigned char *msg)
             json_read   = cJSON_Parse((const char*)msg);
 
             //out=cJSON_Print(json_read);
-            //printf("%s\n",out);
+           // printf("%s\n",out);
 
             item        = cJSON_GetObjectItem(json_read,"CMD");
             if(strcmp(item->valuestring,   "CREATE"    )==0)
@@ -999,7 +999,7 @@ void customMSGfunc(int len, unsigned char *msg)
                     // create new object
                     // ------------------------------------
                     csWindow    *newWindow  = new csWindow();
-                    QUuid    _oid    = QUuid(QString(cJSON_GetObjectItem(json_read,"OID")->valuestring));
+                    QUuid    _oid    = QUuid(QString(cJSON_GetObjectItem(json_read,"OID")->valueint));
                     newWindow->setURI(cJSON_GetObjectItem(json_read,"URI")->valuestring);
                     if(_oid!=QUuid(QString(-1)))
                     {

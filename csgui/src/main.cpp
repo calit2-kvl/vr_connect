@@ -41,6 +41,9 @@
 #include <QFileDialog>
 #include "main.h"
 
+
+int contact_port    = 5510;
+
 // -----------------------------------------------------------------------------+
 // CLASS IMPLEMENTATION
 // -----------------------------------------------------------------------------+
@@ -165,7 +168,8 @@ csImgGoogle::csImgGoogle( QWidget *parent)
     // create the cglx server
     // ---------------------------
     connected   = false;
-    sm	= new myserver(CS_HCI_CUST_SERV,-1, CS_SERV_ACTIVE);
+
+    sm	= new myserver(CS_HCI_CUST_SERV,contact_port, CS_SERV_ACTIVE);
 
     // ---------------------------
     // connect slots and signals
@@ -251,6 +255,7 @@ void csImgGoogle::cs_loadImages()
                 json_send=cJSON_CreateObject();
                 cJSON_AddStringToObject(json_send,"CMD",     "CREATE");
                 cJSON_AddStringToObject(json_send,"TYPE",    "Image");
+                cJSON_AddNumberToObject(json_send,"OID", -1);
                 cJSON_AddStringToObject(json_send,"URI",     fl.at(i).toStdString().c_str());
                 cJSON_AddNumberToObject(json_send,"WIDTH",   pix.width());
                 cJSON_AddNumberToObject(json_send,"HEIGHT",  pix.height());
@@ -284,6 +289,7 @@ void csImgGoogle::sendImgURIToClient(int _width, int _height, const QUrl & url )
     json_send=cJSON_CreateObject();
     cJSON_AddStringToObject(json_send,"CMD",     "CREATE");
     cJSON_AddStringToObject(json_send,"TYPE",    "Image");
+    cJSON_AddNumberToObject(json_send,"OID", -1);
     cJSON_AddStringToObject(json_send,"URI",     url.toString().toStdString().c_str());
     cJSON_AddNumberToObject(json_send,"WIDTH",   _width);
     cJSON_AddNumberToObject(json_send,"HEIGHT",  _height);
@@ -323,6 +329,21 @@ void csImgGoogle::on_pb_Forward_pressed()
 // -----------------------------------------------------------------------------+
 int main( int argc, char ** argv )
 {
+
+    // --------------------------------------------
+    // parse the arguments
+    // --------------------------------------------
+    for (int i=1;i<argc;i++) {
+        if (strcmp(argv[i],"-p") == 0)
+        {
+            if(argv[i+1] !=NULL)
+            {
+                contact_port = atoi(argv[i+1]);
+                i++;
+            }
+        }
+    }
+
     // ---------------------------
     // start the GUI
     // ---------------------------
