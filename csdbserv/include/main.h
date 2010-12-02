@@ -63,11 +63,15 @@ public:
    *  \brief Called when server gets a message from a client.
    */
   void signal_clientdata (const int PID = -1, const char *IP=NULL, const int World=-1, const int UID=-1, unsigned char *data = NULL, unsigned int size = 0);
+
+  void session(const std::string& name);
+  void server(const std::string& name);
 protected:
 
 private:
    csConnect::Session *_dbconnect;
    std::string _sessionname;
+   std::string _servername;
 
 };
 

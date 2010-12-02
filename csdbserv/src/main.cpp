@@ -105,15 +105,36 @@ dbserver::dbserver( cs_hci_type_E type, int port, cs_serv_mode_E mode)
  : cglXServer( type, port, mode)
 
 {
-    _dbconnect = new csConnect::Session;
-    _dbconnect->connect("109.171.139.4");
-
-    _sessionname = "cglX.default";
+    _dbconnect = NULL;
 }
+
 dbserver::~dbserver()
 {
-    delete _dbconnect;
+	if (_dbconnect)
+		delete _dbconnect;
 }
+
+void dbserver::session(const std::string& name)
+{
+	_sessionname = name;
+	if (!_servername.empty() && !_dbconnect)
+	{
+		_dbconnect = new csConnect::Session;
+		_dbconnect->connect(_servername);
+	}
+}
+
+void dbserver::server(const std::string& name)
+{
+	_servername = name;
+	if (!_sessionname.empty() && !_dbconnect)
+	{
+		_dbconnect = new csConnect::Session;
+		_dbconnect->connect(_servername);
+	}
+}
+
+
 // signal connect
 void dbserver::signal_connected(const int PID, const char *IP, const int World, const int UID )
 {
@@ -157,88 +178,95 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
     // -------------------------------------
     if(strcmp(item->valuestring,"CREATE")==0)
     {
-#if 0
-        // ----------------------------------------
-        // read client object id
-        // ----------------------------------------
-        int _cid=cJSON_GetObjectItem(json_read,"CID")->valueint;
+		cJSON *json_send=NULL;
+		uint64_t    uoid    = (uint64_t)obj_id_pool.getID();
+		if (!_dbconnect)
+		{
+			// ----------------------------------------
+			// read client object id
+			// ----------------------------------------
+			int _cid=cJSON_GetObjectItem(json_read,"CID")->valueint;
 
-        // ----------------------------------------
-        // create a unique object ID
-        // (Don't want to create Chris connect instance)
-        // for now we create our own id the CGLX way.
-        // ----------------------------------------
-        uint64_t    uoid    = (uint64_t)obj_id_pool.getID();
+			// ----------------------------------------
+			// create a unique object ID
+			// (Don't want to create Chris connect instance)
+			// for now we create our own id the CGLX way.
+			// ----------------------------------------
 
-        // ----------------------------------------
-        // create a json message
-        // ----------------------------------------
-        cJSON *json_send=NULL;
-        json_send=cJSON_CreateObject();
-        cJSON_AddStringToObject(json_send,"CMD",     "UPDATE");
-        cJSON_AddStringToObject(json_send,"ATTR",    "OID");
-        cJSON_AddNumberToObject(json_send,"CID",     _cid);
-        cJSON_AddNumberToObject(json_send,"OID",     uoid);
-        send_out=cJSON_PrintUnformatted(json_send);
-        cJSON_Delete(json_send);
-        json_send=NULL;
-#else
-        cJSON *json_send=NULL;
-        json_send=cJSON_CreateObject();
-	bool success = _dbconnect->create(json_send, _sessionname, json_read);
-        send_out=cJSON_PrintUnformatted(json_send);
-#endif
-        // ----------------------------------------
-        // we send this only to the creating client
-        // to update his object map
-        // ----------------------------------------
-        setWaitTime (0);
-        sendData((char*) send_out, strlen(send_out), PID);
-        free(send_out);
+			// ----------------------------------------
+			// create a json message
+			// ----------------------------------------
+			json_send=cJSON_CreateObject();
+			cJSON_AddStringToObject(json_send,"CMD",     "UPDATE");
+			cJSON_AddStringToObject(json_send,"ATTR",    "OID");
+			cJSON_AddNumberToObject(json_send,"CID",     _cid);
+			cJSON_AddNumberToObject(json_send,"OID",     uoid);
+			send_out=cJSON_PrintUnformatted(json_send);
+			cJSON_Delete(json_send);
+			json_send=NULL;
+		}
+		else
+		{
+			json_send=cJSON_CreateObject();
+			bool success = _dbconnect->create(json_send, _sessionname, json_read);
+			send_out=cJSON_PrintUnformatted(json_send);
+			json_send = NULL;
+		}
 
-        // ----------------------------------------
-        //  Send a CREATE to all other clients
-        // ----------------------------------------
-#if 0
-        json_send=cJSON_CreateObject();
-        cJSON_AddStringToObject(json_send,"CMD",     "CREATE");
-        cJSON_AddNumberToObject(json_send,"OID",     uoid);
-        cJSON_AddStringToObject(json_send,"TYPE",    "Image");
-        cJSON_AddStringToObject(json_send,"URI",     cJSON_GetObjectItem(json_read,"URI")->valuestring);
-        cJSON_AddNumberToObject(json_send,"WIDTH",   cJSON_GetObjectItem(json_read,"WIDTH")->valueint);
-        cJSON_AddNumberToObject(json_send,"HEIGHT",  cJSON_GetObjectItem(json_read,"HEIGHT")->valueint);
+		// ----------------------------------------
+		// we send this only to the creating client
+		// to update his object map
+		// ----------------------------------------
+		setWaitTime (0);
+		sendData((char*) send_out, strlen(send_out), PID);
+		free(send_out);
 
-        // ------------------------------------
-        // if we have a position
-        // ------------------------------------
-        item        = cJSON_GetObjectItem(json_read,"POS");
-        if(item!=NULL)
-        {
-            float pos[2];
-            pos[0]  = cJSON_GetArrayItem(item, 0)->valuedouble;
-            pos[1]  = cJSON_GetArrayItem(item, 1)->valuedouble;
-            cJSON_AddItemToObject(json_send,"POS", cJSON_CreateFloatArray(pos,2));
-        }
-        // ------------------------------------
-        // if we have a scale
-        // ------------------------------------
-        item        = cJSON_GetObjectItem(json_read,"SCALE");
-        if(item!=NULL)
-        {
-            float scale[2];
-            scale[0]    = cJSON_GetArrayItem(item, 0)->valuedouble;
-            scale[1]    = cJSON_GetArrayItem(item, 1)->valuedouble;
-            cJSON_AddItemToObject(json_send,"SCALE", cJSON_CreateFloatArray(scale,2));
-        }
-#else
-	std::vector<cJSON *> objs;	
-        std::cout << objs.size() << '\n';
-        _dbconnect->read(objs, _sessionname, json_send);
-        std::cout << objs.size() << '\n';
-	assert(objs.size() == 1);
-#endif
+		if (!_dbconnect)
+		{
+			// ----------------------------------------
+			//  Send a CREATE to all other clients
+			// ----------------------------------------
+			json_send=cJSON_CreateObject();
+			cJSON_AddStringToObject(json_send,"CMD",     "CREATE");
+			cJSON_AddNumberToObject(json_send,"OID",     uoid);
+			cJSON_AddStringToObject(json_send,"TYPE",    "Image");
+			cJSON_AddStringToObject(json_send,"URI",     cJSON_GetObjectItem(json_read,"URI")->valuestring);
+			cJSON_AddNumberToObject(json_send,"WIDTH",   cJSON_GetObjectItem(json_read,"WIDTH")->valueint);
+			cJSON_AddNumberToObject(json_send,"HEIGHT",  cJSON_GetObjectItem(json_read,"HEIGHT")->valueint);
 
-        send_out=cJSON_PrintUnformatted(objs[0]);
+			// ------------------------------------
+			// if we have a position
+			// ------------------------------------
+			item        = cJSON_GetObjectItem(json_read,"POS");
+			if(item!=NULL)
+			{
+				float pos[2];
+				pos[0]  = cJSON_GetArrayItem(item, 0)->valuedouble;
+				pos[1]  = cJSON_GetArrayItem(item, 1)->valuedouble;
+				cJSON_AddItemToObject(json_send,"POS", cJSON_CreateFloatArray(pos,2));
+			}
+			// ------------------------------------
+			// if we have a scale
+			// ------------------------------------
+			item        = cJSON_GetObjectItem(json_read,"SCALE");
+			if(item!=NULL)
+			{
+				float scale[2];
+				scale[0]    = cJSON_GetArrayItem(item, 0)->valuedouble;
+				scale[1]    = cJSON_GetArrayItem(item, 1)->valuedouble;
+				cJSON_AddItemToObject(json_send,"SCALE", cJSON_CreateFloatArray(scale,2));
+			}
+			send_out = cJSON_PrintUnformatted(json_send);
+		} else {
+
+			std::vector<cJSON *> objs;	
+			std::cout << objs.size() << '\n';
+			_dbconnect->read(objs, _sessionname, json_send);
+			std::cout << objs.size() << '\n';
+			assert(objs.size() == 1);
+			send_out=cJSON_PrintUnformatted(objs[0]);
+		}
+
         //printf(send_out);
         //fflush(stdout);
         cJSON_Delete(json_send);
@@ -253,7 +281,8 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
         //  Send an UPDATE to all other clients
         // ----------------------------------------
         send_out=cJSON_PrintUnformatted(json_read);
-	_dbconnect->update(_sessionname, json_read);
+		if (!_dbconnect)
+			_dbconnect->update(_sessionname, json_read);
         setWaitTime (0);
         sendData((char*) send_out, strlen(send_out), PID, true);
         free(send_out);
@@ -264,7 +293,8 @@ void dbserver::signal_clientdata (const int PID, const char *IP, const int World
         // ----------------------------------------
         //  Send an UPDATE to all other clients
         // ----------------------------------------
-	_dbconnect->destroy(_sessionname, json_read);
+		if (!_dbconnect)
+			_dbconnect->destroy(_sessionname, json_read);
         send_out=cJSON_PrintUnformatted(json_read);
         setWaitTime (0);
         sendData((char*) send_out, strlen(send_out), PID, true);
@@ -351,6 +381,8 @@ int main( int argc, char ** argv )
     //	Initialize
     // --------------------------------------------
     int 			contact_port 		= -1;			// cglx will use the default port
+	std::string servername;
+	std::string sessionname;
 
     // --------------------------------------------
     // parse the arguments
@@ -369,12 +401,33 @@ int main( int argc, char ** argv )
                 i++;
             }
         }
+		if (strcmp(argv[i], "-server") == 0)
+		{
+            if(argv[i+1] !=NULL)
+			{
+				servername=argv[i+1];
+				i++;
+			}
+		}
+		if (strcmp(argv[i], "-session") == 0)
+		{
+            if(argv[i+1] !=NULL)
+			{
+				sessionname=argv[i+1];
+				i++;
+			}
+		}
     }
 
     // --------------------------------------------
     // start the server
     // --------------------------------------------
     startServer(contact_port);
+	if (!sessionname.empty())
+		session_server->session(sessionname);
+	if (!servername.empty())
+		session_server->server(servername);
+
 
     // --------------------------------------------
     // enter a loop
