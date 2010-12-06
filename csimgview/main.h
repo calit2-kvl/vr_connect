@@ -574,8 +574,8 @@ private:
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
         gluBuild2DMipmaps(GL_TEXTURE_2D, 4, c_width, c_height, GL_RGBA, GL_UNSIGNED_BYTE, blob->data());
+
         // unbind
-        glDisable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
         blob_update = false;
         if(blob!=0)

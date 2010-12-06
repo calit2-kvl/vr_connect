@@ -1109,13 +1109,13 @@ void customMSGfunc(int len, unsigned char *msg)
 }
 void mousefunc(int button, int state, int x, int y)
 {
-    static vec2f_S vec;
-    vec.x   = x;
-    vec.y   = y;
-    transPointerPos(&vec);
-
     if(cglXUpdateFirst())
     {
+        static vec2f_S vec;
+        vec.x   = x;
+        vec.y   = y;
+        transPointerPos(&vec);
+
         if(checkWinHit(&vec, cglxEM::getUID(), button, state))
         {
             // put it in front of the list
@@ -1148,13 +1148,13 @@ void mousefunc(int button, int state, int x, int y)
 }
 void motionfunc(int x,int y)
 {
-    static vec2f_S vec;
-    vec.x   = x;
-    vec.y   = y;
-    transPointerPos(&vec);
-
     if(cglXUpdateFirst())
     {
+        static vec2f_S vec;
+        vec.x   = x;
+        vec.y   = y;
+        transPointerPos(&vec);
+
         csWindow* window    = NULL;
         int UserID  = cglxEM::getUID();
         csWindow::im_iter iter = m_InteractionMap.find(UserID);
