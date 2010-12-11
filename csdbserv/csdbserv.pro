@@ -51,7 +51,7 @@ linux-g++ {
 # -g++ 64bit
 # ---------------------------------------------------------------------------
 linux-g++-64 {
-    LIBS += -L /usr/lib64 -luuid -L /usr/local/cglX/lib -lcglXnet -lmongoclient -lboost_thread
+    LIBS += -L /usr/lib64 -luuid -lmongoclient -L/usr/local/lib -lboost_system -lboost_thread -lboost_filesystem -L /usr/local/cglX/lib -lcglXnet
     INCLUDEPATH += $${MY_INCDIR} $${ADD_INCDIR} /usr/local/cglX/include
 
     # clean it

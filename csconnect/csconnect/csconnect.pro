@@ -1,26 +1,86 @@
-TARGET = csconnect
-LANGUAGE = C++
-TEMPLATE = lib
-DESTDIR = ../lib
-CONFIG = staticlib
+# ---------------------------------------------------------------------------
+# some basic configurations 
+# ---------------------------------------------------------------------------
+
+TARGET                = csconnect
+PROJECT               = TUTORIAL
+VERSION               = 1
+
+TEMPLATE              = lib
+LANGUAGE              = C++
+CONFIG               += warn_off release staticlib
+
+DEFINES              += 
+
+QT 										= 
+QMAKE_CXXFLAGS 				+= -fno-visibility-inlines-hidden
+
+# ---------------------------------------------------------------------------
+# common settings 
+# ---------------------------------------------------------------------------
+
+DESTDIR               = ../lib
+OBJECTS_DIR           = .obj
+INCLUDEPATH 				 += interface
+INCLUDEPATH          += ../../common
 
 macx:MONGOPATH = ../../../../dependencies
+unix:MONGOPATH = /usr/local/include
 
+# ---------------------------------------------------------------------------
+# The sources
+# ---------------------------------------------------------------------------
 
-macx:QMAKE_CXXFLAGS += -fno-visibility-inlines-hidden
+HEADERS              += interface/csconnect.h
 
-INCLUDEPATH += interface
-INCLUDEPATH += ../../common
-macx:INCLUDEPATH += $$MONGOPATH
+SOURCES              += csconnect.cpp
 
-macx:LIBS += -L$$MONGOPATH/mongo -lmongoclient -lboost_system-mt -lboost_thread-mt -L../../common -lcommon
+# ---------------------------------------------------------------------------
+# linux
+# -g++
+# ---------------------------------------------------------------------------
+linux-g++ {
+ LIBS                += -L$$MONGOPATH/mongo -lmongoclient -lboost_system-mt -lboost_thread-mt -L../../common -lcommon
 
-HEADERS = interface/csconnect.h
+ # clean it
+ CLEAN_FILES          = ./$${DESTDIR}/lib$${TARGET}.a
+}
+# ---------------------------------------------------------------------------
+# linux
+# -g++-64
+# ---------------------------------------------------------------------------
+linux-g++-64 {
+ LIBS                += -L$$MONGOPATH/mongo -lmongoclient -L/usr/local/lib -lboost_system -lboost_thread -L../../common -lcommon
 
-SOURCES = csconnect.cpp
+ # clean it
+ CLEAN_FILES          = ./$${DESTDIR}/lib$${TARGET}.a
+}
+# ---------------------------------------------------------------------------
+# MAC OS Native AGL
+# -g++
+# ---------------------------------------------------------------------------
+macx-g++{
+ CONFIG += x86_64
+ CONFIG -= x86
+ LIBS                += -L$$MONGOPATH/mongo -lmongoclient -lboost_system-mt -lboost_thread-mt -L../../common -lcommon
 
+ # clean it
+ CLEAN_FILES          = -rf ./$${DESTDIR}$${TARGET}.app
+}
+# ---------------------------------------------------------------------------
+# MAC OS Native AGL
+# -macx-xcode
+# ---------------------------------------------------------------------------
+macx-xcode{
+ CONFIG 						+= x86_64
+ CONFIG 						 -= x86
+ LIBS                += -L$$MONGOPATH/mongo -lmongoclient -lboost_system-mt -lboost_thread-mt -L../../common -lcommon
 
-QT -= core gui
+ # clean it
+ CLEAN_FILES          = -rf ./$${DESTDIR}$${TARGET}.app
+}
 
-macx:CONFIG += x86_64
-macx:CONFIG -= x86
+# ---------------------------------------------------------------------------
+# CLEAN UP THE REST THAT IS COMMON
+# ---------------------------------------------------------------------------
+CLEAN_FILES	+= ./*~ $${OBJECTS_DIR}/* ./Makefile
